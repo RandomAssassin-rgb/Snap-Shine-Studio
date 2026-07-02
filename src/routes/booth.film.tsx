@@ -257,12 +257,12 @@ function FilmBoothPage() {
           {/* Live Preview */}
           <div className="px-4 lg:px-0">
             <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-pop">
-            <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
+            <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
                 <p className="text-[10px] uppercase tracking-[0.3em] text-gold">Live preview</p>
                 <h2 className="truncate font-display text-2xl">{config.label}</h2>
               </div>
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex flex-wrap shrink-0 items-center gap-2">
                 <Select value={exportSize} onValueChange={setExportSize}>
                   <SelectTrigger className="h-9 w-44"><SelectValue /></SelectTrigger>
                   <SelectContent>
