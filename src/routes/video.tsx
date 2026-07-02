@@ -155,9 +155,9 @@ function VideoBoothPage() {
   return (
     <div className="min-h-screen bg-gradient-soft">
       <SiteHeader />
-      <main className="mx-auto max-w-5xl gap-6 px-4 py-6 lg:grid lg:grid-cols-[1fr_320px]">
-        <div>
-          <div className="relative overflow-hidden rounded-3xl bg-black shadow-pop aspect-video">
+      <main className="mx-auto max-w-5xl gap-6 py-0 lg:grid lg:grid-cols-[1fr_320px] lg:px-4 lg:py-6">
+        <div className="lg:pt-0">
+          <div className="relative overflow-hidden bg-black shadow-pop aspect-[3/4] w-full sm:aspect-[4/3] lg:aspect-video lg:rounded-3xl">
             <video ref={previewRef} autoPlay muted playsInline className={`h-full w-full object-cover ${blob ? "hidden" : ""}`} style={{ transform: "scaleX(-1)" }} />
             <video ref={playbackRef} playsInline controls className={`h-full w-full object-cover ${blob ? "" : "hidden"}`} />
             {countdown !== null && (
@@ -177,7 +177,7 @@ function VideoBoothPage() {
             )}
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-2 px-4 lg:px-0">
             {!recording && !blob && (
               <Button size="lg" onClick={beginRecording} disabled={!ready} className="flex-1 min-w-[180px]">
                 <VideoIcon className="mr-2 h-5 w-5" />Record {duration}s
@@ -199,7 +199,7 @@ function VideoBoothPage() {
           </div>
         </div>
 
-        <aside className="mt-6 space-y-4 lg:mt-0">
+        <aside className="mt-6 space-y-4 px-4 pb-6 lg:mt-0 lg:px-0 lg:pb-0">
           <div className="glass rounded-2xl p-4 space-y-4">
             <div>
               <Label className="text-xs uppercase tracking-widest text-muted-foreground">Duration</Label>

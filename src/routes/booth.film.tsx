@@ -197,12 +197,12 @@ function FilmBoothPage() {
     <div className="min-h-screen bg-gradient-soft grain">
       <SiteHeader />
 
-      <main className="mx-auto max-w-[1600px] gap-6 px-4 py-6 lg:grid lg:grid-cols-[1fr_400px]">
+      <main className="mx-auto max-w-[1600px] gap-6 py-0 lg:grid lg:grid-cols-[1fr_400px] lg:px-4 lg:py-6">
         {/* LEFT: CAMERA + PREVIEW */}
-        <div className="space-y-5">
+        <div className="space-y-5 lg:pt-0">
           {/* Camera */}
-          <div className="relative overflow-hidden rounded-3xl bg-black shadow-pop">
-            <div className="relative aspect-video w-full">
+          <div className="relative overflow-hidden bg-black shadow-pop lg:rounded-3xl">
+            <div className="relative aspect-[3/4] w-full sm:aspect-[4/3] lg:aspect-video">
               <video
                 ref={cam.videoRef}
                 autoPlay muted playsInline
@@ -250,10 +250,13 @@ function FilmBoothPage() {
           </div>
 
           {/* Reorder tray */}
-          <SortableShots shots={shots} onChange={setShots} />
+          <div className="px-4 lg:px-0">
+            <SortableShots shots={shots} onChange={setShots} />
+          </div>
 
           {/* Live Preview */}
-          <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-pop">
+          <div className="px-4 lg:px-0">
+            <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-pop">
             <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
               <div className="min-w-0">
                 <p className="text-[10px] uppercase tracking-[0.3em] text-gold">Live preview</p>
@@ -281,10 +284,11 @@ function FilmBoothPage() {
               <FilmStripPreview shots={shots} config={config} />
             </div>
           </div>
+          </div>
         </div>
 
         {/* RIGHT: TEMPLATES + SETTINGS */}
-        <aside className="mt-6 space-y-4 lg:mt-0">
+        <aside className="mt-6 space-y-4 px-4 pb-6 lg:mt-0 lg:px-0 lg:pb-0">
           {/* Template picker */}
           <div className="rounded-3xl border border-gold/20 bg-card/80 p-4 shadow-pop backdrop-blur">
             <div className="mb-3 flex items-center justify-between">
