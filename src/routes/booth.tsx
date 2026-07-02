@@ -232,7 +232,7 @@ function BoothPage() {
     <div className="min-h-screen bg-gradient-soft">
       <SiteHeader />
 
-      <main className="mx-auto max-w-[1600px] gap-6 px-4 py-6 lg:grid lg:grid-cols-[112px_1fr_380px]">
+      <main className="mx-auto max-w-[1600px] gap-6 py-0 lg:grid lg:grid-cols-[112px_1fr_380px] lg:px-4 lg:py-6">
         {/* VERTICAL FILTER RAIL */}
         <aside className="hidden lg:block">
           <div className="sticky top-20 rounded-3xl border border-gold/20 bg-card/60 p-3 shadow-pop backdrop-blur">
@@ -272,10 +272,10 @@ function BoothPage() {
         </aside>
 
         {/* CAMERA COLUMN */}
-        <div>
-          <div className="relative overflow-hidden rounded-3xl bg-black shadow-pop">
+        <div className="lg:pt-0">
+          <div className="relative overflow-hidden bg-black shadow-pop lg:rounded-3xl">
             {/* Video preview */}
-            <div className="relative aspect-video w-full">
+            <div className="relative aspect-[3/4] w-full sm:aspect-[4/3] lg:aspect-video">
               <video
                 ref={cam.videoRef}
                 autoPlay muted playsInline
@@ -391,7 +391,7 @@ function BoothPage() {
 
           {/* Shot thumbnails */}
           {shots.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-3">
+            <div className="mt-4 flex flex-wrap gap-3 px-4 lg:px-0">
               {shots.map((c, i) => (
                 <div key={i} className="relative">
                   <img
@@ -412,7 +412,7 @@ function BoothPage() {
           )}
 
           {/* Mobile filter strip (lg rail replaces this on desktop) */}
-          <div className="mt-4 lg:hidden">
+          <div className="mt-4 px-4 lg:hidden lg:px-0">
             <p className="mb-2 text-[10px] uppercase tracking-[0.3em] text-gold">Filters</p>
             <div className="flex gap-2 overflow-x-auto pb-2">
               {FILTERS.map((f) => (
@@ -433,7 +433,7 @@ function BoothPage() {
         </div>
 
         {/* SIDE PANEL */}
-        <aside className="mt-6 space-y-4 lg:mt-0">
+        <aside className="mt-6 space-y-4 px-4 pb-6 lg:mt-0 lg:px-0 lg:pb-0">
           {/* Strip preview */}
           {stripUrl && (
             <div className="glass rounded-2xl p-4 shadow-pop">
