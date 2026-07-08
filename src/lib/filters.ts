@@ -8,7 +8,8 @@ export type FilterId =
   | "soft" | "pastel" | "hdr" | "highcontrast" | "lowcontrast"
   | "bright" | "dark" | "sharpen" | "noir" | "glow" | "vhs"
   | "retro" | "invert" | "cold" | "candy" | "sunset" | "mono"
-  | "clarity" | "matte";
+  | "clarity" | "matte" | "blush" | "retro_neon" | "mystic_glow"
+  | "warm_beer" | "webcam_glow";
 
 export interface FilterPreset {
   id: FilterId;
@@ -49,6 +50,13 @@ export const FILTERS: FilterPreset[] = [
   { id: "mono",         label: "Mono",         css: "grayscale(1) sepia(0.2)" },
   { id: "clarity",      label: "Clarity",      css: "contrast(1.2) saturate(1.15) brightness(1.02)" },
   { id: "matte",        label: "Matte",        css: "contrast(0.9) saturate(0.85) brightness(1.05)" },
+  
+  // Custom Color-Grading Filters based on User Samples
+  { id: "blush",        label: "Blush",        css: "brightness(1.15) contrast(1.05) saturate(1.2)", overlay: { color: "#ffc2d1", blend: "overlay", opacity: 0.25 } },
+  { id: "retro_neon",   label: "Retro Neon Film", css: "sepia(0.4) contrast(1.25) saturate(1.4) brightness(1.05)", overlay: { color: "#80ffaa", blend: "overlay", opacity: 0.2 } },
+  { id: "mystic_glow",  label: "Mystic Glow",  css: "brightness(1.2) contrast(0.9) blur(1px) saturate(1.1)", overlay: { color: "#a8e6cf", blend: "soft-light", opacity: 0.35 } },
+  { id: "warm_beer",    label: "Warm Clear Beer", css: "sepia(0.6) contrast(1.1) saturate(1.2) brightness(1.08)", overlay: { color: "#ffb74d", blend: "overlay", opacity: 0.25 } },
+  { id: "webcam_glow",  label: "Webcam Glow",  css: "brightness(1.15) contrast(0.95) blur(0.5px)", overlay: { color: "#b3e5fc", blend: "screen", opacity: 0.2 } },
 ];
 
 export const getFilter = (id: FilterId): FilterPreset =>
