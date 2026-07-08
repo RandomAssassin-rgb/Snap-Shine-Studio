@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { signMany } from "@/lib/storage";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — Snap & Shine Studio" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Admin — SnapBooth" }, { name: "robots", content: "noindex" }] }),
   component: AdminPage,
 });
 

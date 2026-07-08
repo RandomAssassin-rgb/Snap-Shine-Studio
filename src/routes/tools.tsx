@@ -11,7 +11,7 @@ import { editImage } from "@/lib/ai-tools.functions";
 
 export const Route = createFileRoute("/tools")({
   head: () => ({ meta: [
-    { title: "AI tools — Snap & Shine Studio" },
+    { title: "AI tools — SnapBooth" },
     { name: "description", content: "AI background removal, run entirely in your browser." },
   ] }),
   component: ToolsPage,
@@ -130,7 +130,7 @@ function ToolsPage() {
                 <>
                   <img src={outUrl} alt="Result" className="mx-auto max-h-96 rounded-lg" />
                   <div className="mt-2 text-center">
-                    <Button size="sm" onClick={() => outBlob && downloadBlob(outBlob, `Snap & Shine Studio-ai-${Date.now()}.png`)}>
+                    <Button size="sm" onClick={() => outBlob && downloadBlob(outBlob, `snapbooth-ai-${Date.now()}.png`)}>
                       <Download className="mr-1 h-4 w-4" />Download PNG
                     </Button>
                   </div>
@@ -138,7 +138,7 @@ function ToolsPage() {
               ) : <div className="grid h-48 place-items-center text-sm text-muted-foreground">Result appears here.</div>}
             </div>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">Powered by OpenRouter AI (Gemini Flash).</p>
+          <p className="mt-3 text-xs text-muted-foreground">Powered by Lovable AI. Each edit uses workspace credits.</p>
         </section>
       </main>
     </div>

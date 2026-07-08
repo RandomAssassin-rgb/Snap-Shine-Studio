@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { initCameraKit, setCameraKitStream, getAvailableLenses, applyLens, destroyCameraKitSession } from "@/lib/camera-kit";
+import { Lens } from "@snap/camera-kit";
 
 export interface CameraDevice {
   deviceId: string;
@@ -17,10 +19,21 @@ export function useCamera() {
   const [error, setError] = useState<string | null>(null);
   const [mirror, setMirror] = useState(true);
 
+  // Camera Kit specific state
+  const [arEnabled, setArEnabled] = useState(false);
+  const [arLenses, setArLenses] = useState<Lens[]>([]);
+  const [activeLensId, setActiveLensId] = useState<string | null>(null);
+  const arCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const rawStreamRef = useRef<MediaStream | null>(null);
+
   const stop = useCallback(() => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(t => t.stop());
       streamRef.current = null;
+    }
+    if (rawStreamRef.current) {
+      rawStreamRef.current.getTracks().forEach(t => t.stop());
+      rawStreamRef.current = null;
     }
   }, []);
 
@@ -56,9 +69,32 @@ export function useCamera() {
     };
     try {
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      streamRef.current = stream;
+      rawStreamRef.current = stream;
+
+      // Initialize AR Canvas if missing
+      if (!arCanvasRef.current) {
+        arCanvasRef.current = document.createElement("canvas");
+      }
+
+      // Try to boot Camera Kit
+      const session = await initCameraKit();
+      if (session && arCanvasRef.current) {
+        setArEnabled(true);
+        setArLenses(getAvailableLenses());
+        
+        // Pipe stream through Snap SDK
+        await setCameraKitStream(stream, arCanvasRef.current);
+        
+        // Extract the processed AR stream and feed it to the UI
+        const processedStream = arCanvasRef.current.captureStream(30);
+        streamRef.current = processedStream;
+      } else {
+        // Fallback to raw stream if SDK fails
+        streamRef.current = stream;
+      }
+
       if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+        videoRef.current.srcObject = streamRef.current;
         await videoRef.current.play().catch(() => {});
       }
       const track = stream.getVideoTracks()[0];
@@ -93,8 +129,18 @@ export function useCamera() {
     }
   }, [devices, deviceId, facingMode, start]);
 
+  const setLens = useCallback(async (lensId: string | null) => {
+    if (arEnabled) {
+      setActiveLensId(lensId);
+      await applyLens(lensId || "");
+    }
+  }, [arEnabled]);
+
   useEffect(() => {
-    return () => stop();
+    return () => {
+      stop();
+      destroyCameraKitSession();
+    };
   }, [stop]);
 
   useEffect(() => {
@@ -130,5 +176,6 @@ export function useCamera() {
     mirror, setMirror,
     start, stop, switchCamera, capture, refreshDevices,
     setDeviceId,
+    arEnabled, arLenses, activeLensId, setLens
   };
 }

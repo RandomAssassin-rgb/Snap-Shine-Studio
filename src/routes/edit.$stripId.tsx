@@ -14,7 +14,7 @@ import { downloadBlob, loadImage } from "@/lib/strip";
 import { signedUrl } from "@/lib/storage";
 
 export const Route = createFileRoute("/edit/$stripId")({
-  head: () => ({ meta: [{ title: "Edit strip — Snap & Shine Studio" }] }),
+  head: () => ({ meta: [{ title: "Edit strip — SnapBooth" }] }),
   component: EditStripPage,
 });
 
@@ -138,7 +138,7 @@ function EditStripPage() {
   async function save() {
     const c = canvasRef.current; if (!c) return;
     const blob = await new Promise<Blob>((res, rej) => c.toBlob((b) => b ? res(b) : rej(new Error("blob")), "image/jpeg", 0.92));
-    downloadBlob(blob, `Snap & Shine Studio-edited-${Date.now()}.jpg`);
+    downloadBlob(blob, `snapbooth-edited-${Date.now()}.jpg`);
   }
 
   async function saveToCloud() {

@@ -23,12 +23,12 @@ const base: Omit<FilmStripConfig, "id" | "label"> = {
   brandingBg: undefined,
   brandingTextColor: "#0d0d0d",
   brandingAccent: undefined,
-  eventName: "Snap & Shine Studio",
+  eventName: "SnapBooth",
   showEventName: true,
   showDate: true,
   dateFormat: "long",
   showLogo: true,
-  logoText: "Snap & Shine Studio",
+  logoText: "SNAPBOOTH",
   showQr: false,
   brandingPosition: "bottom",
   fontFamily: '"Fraunces", Georgia, serif',
@@ -43,7 +43,7 @@ export const FILM_STRIP_PRESETS: FilmStripConfig[] = [
   preset("dual-vertical", "Dual Vertical"),
   preset("minimal-white", "Minimal White", {
     filmColor: "#111111", bg: "#ffffff", brandingTextColor: "#111111", labelUppercase: false,
-    logoText: "Snap & Shine Studio", fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif', shadow: false,
+    logoText: "snapbooth", fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif', shadow: false,
     borderThickness: 18, cornerRadius: 18, sprocketColor: "#ffffff",
   }),
   preset("retro-film", "Retro Film", {
@@ -99,20 +99,13 @@ export const FILM_STRIP_PRESETS: FilmStripConfig[] = [
   preset("instagram-grid", "Instagram Grid", {
     perStrip: 3, bg: "#ffffff", filmColor: "#0d0d0d",
     sprocketColor: "#ffffff", brandingTextColor: "#0d0d0d",
-    logoText: "@Snap & Shine Studio", labelUppercase: false,
+    logoText: "@snapbooth", labelUppercase: false,
     fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
   }),
   preset("passport-sheet", "Passport", {
     perStrip: 4, bg: "#ffffff", filmColor: "#111111",
     sprocketColor: "#ffffff", brandingTextColor: "#111111",
     logoText: "PASSPORT", brandingHeight: 110, showDate: true,
-  }),
-  preset("hatk-black", "Hatk Black", {
-    bg: "#000000", filmColor: "#000000", sprocketColor: "#ffffff",
-    brandingTextColor: "#ffffff", logoText: "hatk.",
-    fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
-    labelUppercase: false, showDate: false, showEventName: false,
-    shadow: false, innerSpacing: 16, outerMargin: 64,
   }),
 ];
 

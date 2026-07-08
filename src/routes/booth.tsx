@@ -1,7 +1,7 @@
-import { createFileRoute, Link, useNavigate, Outlet, useLocation } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Camera, RefreshCw, Repeat, Volume2, VolumeX, Download, Share2, Save, Trash2, Sparkles, ChevronsUpDown, Sun, Search } from "lucide-react";
+import { Camera, RefreshCw, Repeat, Volume2, VolumeX, Download, Share2, Save, Trash2, Sparkles, ChevronsUpDown, Sun } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/site-header";
@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import { Input } from "@/components/ui/input";
 import { useCamera } from "@/hooks/use-camera";
 import { useAuth } from "@/hooks/use-auth";
 import { FILTERS, DEFAULT_ADJUST, combineFilterCss, getFilter, type FilterId, type LiveAdjust } from "@/lib/filters";
@@ -23,19 +22,11 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/booth")({
   head: () => ({ meta: [
-    { title: "Booth - Snap & Shine Studio" },
+    { title: "Booth — SnapBooth" },
     { name: "description", content: "Take photos, pick filters, and generate strips in the browser." },
   ] }),
-  component: BoothPageWrapper,
+  component: BoothPage,
 });
-
-function BoothPageWrapper() {
-  const location = useLocation();
-  if (location.pathname.startsWith("/booth/")) {
-    return <Outlet />;
-  }
-  return <BoothPage />;
-}
 
 type CountdownOpt = 0 | 3 | 5 | 10;
 
@@ -44,13 +35,12 @@ function BoothPage() {
   const navigate = useNavigate();
 
   const cam = useCamera();
-  const [filterId, setFilterId] = useState<FilterId>("normal");
+  const [filterId, setFilterId] = useState<FilterId | string>("normal");
   const [adjust, setAdjust] = useState<LiveAdjust>(DEFAULT_ADJUST);
   const [layoutId, setLayoutId] = useState<LayoutId>("three");
   const [countdown, setCountdown] = useState<CountdownOpt>(3);
   const [flash, setFlash] = useState(true);
   const [sound, setSound] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
 
   const [shots, setShots] = useState<HTMLCanvasElement[]>([]);
   const [capturing, setCapturing] = useState(false);
@@ -61,10 +51,20 @@ function BoothPage() {
   const [uploading, setUploading] = useState(false);
   const [publicUrl, setPublicUrl] = useState<string | null>(null);
 
-  const filter = getFilter(filterId);
+  const filter = getFilter(filterId as FilterId);
   const filterCss = useMemo(() => combineFilterCss(filter, adjust), [filter, adjust]);
   const layout = getLayout(layoutId);
   const currentShotIdx = shots.length;
+
+  const handleFilterSelect = (id: string) => {
+    setFilterId(id);
+    const isAr = cam.arLenses.some(l => l.id === id);
+    if (isAr) {
+      cam.setLens(id);
+    } else {
+      cam.setLens(null); // disable AR lens
+    }
+  };
 
   // Start camera on mount
   useEffect(() => { cam.start(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
@@ -232,19 +232,46 @@ function BoothPage() {
     <div className="min-h-screen bg-gradient-soft">
       <SiteHeader />
 
-      <main className="mx-auto max-w-[1600px] gap-6 py-0 lg:grid lg:grid-cols-[112px_1fr_380px] lg:px-4 lg:py-6">
+      <main className="mx-auto max-w-[1600px] gap-6 px-4 py-6 lg:grid lg:grid-cols-[112px_1fr_380px]">
         {/* VERTICAL FILTER RAIL */}
         <aside className="hidden lg:block">
           <div className="sticky top-20 rounded-3xl border border-gold/20 bg-card/60 p-3 shadow-pop backdrop-blur">
             <p className="mb-3 px-1 text-center text-[9px] uppercase tracking-[0.32em] text-gold">Filtres</p>
             <div className="hairline mb-3" />
             <div className="max-h-[70vh] space-y-1.5 overflow-y-auto pr-1">
+              {/* AR Lenses from Snap Camera Kit */}
+              {cam.arLenses.map((lens) => {
+                const active = filterId === lens.id;
+                return (
+                  <button
+                    key={lens.id}
+                    onClick={() => handleFilterSelect(lens.id)}
+                    className={`group relative flex w-full flex-col items-center gap-1 rounded-2xl border p-2 transition ${
+                      active
+                        ? "border-gold/70 bg-gradient-gold text-primary-foreground shadow-glow"
+                        : "border-transparent hover:border-gold/30 hover:bg-secondary/60"
+                    }`}
+                    title={lens.name}
+                  >
+                    <img
+                      src={lens.iconUrl}
+                      alt={lens.name}
+                      className={`h-10 w-10 rounded-xl object-cover ring-1 ring-inset ${active ? "ring-white/40" : "ring-border/60"}`}
+                    />
+                    <span className={`w-full truncate text-center text-[9px] font-medium uppercase tracking-[0.14em] ${active ? "text-primary-foreground" : "text-muted-foreground"}`}>
+                      {lens.name}
+                    </span>
+                  </button>
+                );
+              })}
+
+              {/* Standard CSS Filters */}
               {FILTERS.map((f) => {
                 const active = filterId === f.id;
                 return (
                   <button
                     key={f.id}
-                    onClick={() => setFilterId(f.id)}
+                    onClick={() => handleFilterSelect(f.id)}
                     className={`group relative flex w-full flex-col items-center gap-1 rounded-2xl border p-2 transition ${
                       active
                         ? "border-gold/70 bg-gradient-gold text-primary-foreground shadow-glow"
@@ -272,10 +299,10 @@ function BoothPage() {
         </aside>
 
         {/* CAMERA COLUMN */}
-        <div className="lg:pt-0">
-          <div className="relative overflow-hidden bg-black shadow-pop lg:rounded-3xl">
+        <div>
+          <div className="relative overflow-hidden rounded-3xl bg-black shadow-pop">
             {/* Video preview */}
-            <div className="relative aspect-[3/4] w-full sm:aspect-[4/3] lg:aspect-video">
+            <div className="relative aspect-video w-full">
               <video
                 ref={cam.videoRef}
                 autoPlay muted playsInline
@@ -391,7 +418,7 @@ function BoothPage() {
 
           {/* Shot thumbnails */}
           {shots.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-3 px-4 lg:px-0">
+            <div className="mt-4 flex flex-wrap gap-3">
               {shots.map((c, i) => (
                 <div key={i} className="relative">
                   <img
@@ -412,13 +439,27 @@ function BoothPage() {
           )}
 
           {/* Mobile filter strip (lg rail replaces this on desktop) */}
-          <div className="mt-4 px-4 lg:hidden lg:px-0">
+          <div className="mt-4 lg:hidden">
             <p className="mb-2 text-[10px] uppercase tracking-[0.3em] text-gold">Filters</p>
             <div className="flex gap-2 overflow-x-auto pb-2">
+              {cam.arLenses.map((lens) => (
+                <button
+                  key={lens.id}
+                  onClick={() => handleFilterSelect(lens.id)}
+                  className={`shrink-0 flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
+                    filterId === lens.id
+                      ? "border-gold bg-gradient-gold text-primary-foreground"
+                      : "border-border bg-card hover:bg-secondary"
+                  }`}
+                >
+                  <img src={lens.iconUrl} alt="" className="h-4 w-4 rounded-full" />
+                  {lens.name}
+                </button>
+              ))}
               {FILTERS.map((f) => (
                 <button
                   key={f.id}
-                  onClick={() => setFilterId(f.id)}
+                  onClick={() => handleFilterSelect(f.id)}
                   className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
                     filterId === f.id
                       ? "border-gold bg-gradient-gold text-primary-foreground"
@@ -433,7 +474,7 @@ function BoothPage() {
         </div>
 
         {/* SIDE PANEL */}
-        <aside className="mt-6 space-y-4 px-4 pb-6 lg:mt-0 lg:px-0 lg:pb-0">
+        <aside className="mt-6 space-y-4 lg:mt-0">
           {/* Strip preview */}
           {stripUrl && (
             <div className="glass rounded-2xl p-4 shadow-pop">
@@ -471,15 +512,6 @@ function BoothPage() {
                 <p className="text-[10px] uppercase tracking-[0.3em] text-gold">Templates</p>
                 <span className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">{LAYOUTS.length}+ ready</span>
               </div>
-              <div className="relative mb-3">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Search templates..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-9 text-sm"
-                />
-              </div>
               <Link
                 to="/booth/film"
                 className="mb-3 flex items-center justify-between rounded-xl border border-gold/40 bg-gradient-gold/10 px-3 py-2 text-xs uppercase tracking-widest text-gold hover:bg-gradient-gold/20"
@@ -490,7 +522,7 @@ function BoothPage() {
               <div className="hairline mb-3" />
               <div className="max-h-[520px] space-y-5 overflow-y-auto pr-1">
                 {LAYOUT_CATEGORIES.map((cat) => {
-                  const items = LAYOUTS.filter((l) => (l.category ?? "Classic") === cat && l.label.toLowerCase().includes(searchQuery.toLowerCase()));
+                  const items = LAYOUTS.filter((l) => (l.category ?? "Classic") === cat);
                   if (!items.length) return null;
                   return (
                     <div key={cat}>
@@ -577,6 +609,11 @@ function BoothPage() {
             </TabsContent>
           </Tabs>
 
+          {!user && (
+            <div className="glass rounded-2xl p-4 text-sm">
+              <p className="mb-2 font-medium">Snap as a guest, or <Link to="/auth" className="underline">sign in</Link> to save strips to your cloud gallery.</p>
+            </div>
+          )}
         </aside>
       </main>
     </div>

@@ -1,9 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Camera, RefreshCw, Repeat, Volume2, VolumeX, Download, Save, Trash2, Star, StarOff,
-  MoreVertical, Copy, Pencil, Sparkles, ChevronsUpDown, Sun, Search, ArrowLeft,
+  MoreVertical, Copy, Pencil, Sparkles, ChevronsUpDown, Sun,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,7 +29,7 @@ import { filmStripLibrary, type StoredTemplate } from "@/lib/film-strip-library"
 
 export const Route = createFileRoute("/booth/film")({
   head: () => ({ meta: [
-    { title: "Classic Film Strips — Snap & Shine Studio" },
+    { title: "Classic Film Strips — SnapBooth" },
     { name: "description", content: "Premium dual vertical film strip templates with live editing, drag reordering and print-quality export." },
   ] }),
   component: FilmBoothPage,
@@ -43,6 +43,7 @@ function FilmBoothPage() {
   const cam = useCamera();
 
   const [presetId, setPresetId] = useState<string>(FILM_STRIP_PRESETS[0].id);
+  const [activeLensId, setActiveLensId] = useState<string>("normal");
   const [config, setConfig] = useState<FilmStripConfig>(FILM_STRIP_PRESETS[0]);
   const [shots, setShots] = useState<HTMLCanvasElement[]>([]);
   const [capturing, setCapturing] = useState(false);
@@ -57,7 +58,6 @@ function FilmBoothPage() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [renamingKey, setRenamingKey] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
   const editorOpenRef = useRef(false);
 
   useEffect(() => { cam.start(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
@@ -197,12 +197,12 @@ function FilmBoothPage() {
     <div className="min-h-screen bg-gradient-soft grain">
       <SiteHeader />
 
-      <main className="mx-auto max-w-[1600px] gap-6 py-0 lg:grid lg:grid-cols-[1fr_400px] lg:px-4 lg:py-6">
+      <main className="mx-auto max-w-[1600px] gap-6 px-4 py-6 lg:grid lg:grid-cols-[1fr_400px]">
         {/* LEFT: CAMERA + PREVIEW */}
-        <div className="space-y-5 lg:pt-0">
+        <div className="space-y-5">
           {/* Camera */}
-          <div className="relative overflow-hidden bg-black shadow-pop lg:rounded-3xl">
-            <div className="relative aspect-[3/4] w-full sm:aspect-[4/3] lg:aspect-video">
+          <div className="relative overflow-hidden rounded-3xl bg-black shadow-pop">
+            <div className="relative aspect-video w-full">
               <video
                 ref={cam.videoRef}
                 autoPlay muted playsInline
@@ -247,22 +247,54 @@ function FilmBoothPage() {
               <Button variant="outline" size="icon" onClick={() => setSound(!sound)} title="Sound">{sound ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}</Button>
               {shots.length > 0 && <Button variant="outline" size="icon" onClick={clearAll} title="Clear"><Trash2 className="h-4 w-4" /></Button>}
             </div>
+            
+            {/* AR Lenses */}
+            {cam.arLenses.length > 0 && (
+              <div className="border-t border-border/20 bg-card p-3">
+                <p className="mb-2 text-[10px] uppercase tracking-[0.3em] text-gold flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" /> AR Lenses
+                </p>
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  <button
+                    onClick={() => { setActiveLensId("normal"); cam.setLens(null); }}
+                    className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
+                      activeLensId === "normal"
+                        ? "border-gold bg-gradient-gold text-primary-foreground"
+                        : "border-border bg-card hover:bg-secondary"
+                    }`}
+                  >
+                    Clear Lens
+                  </button>
+                  {cam.arLenses.map((lens) => (
+                    <button
+                      key={lens.id}
+                      onClick={() => { setActiveLensId(lens.id); cam.setLens(lens.id); }}
+                      className={`shrink-0 flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
+                        activeLensId === lens.id
+                          ? "border-gold bg-gradient-gold text-primary-foreground"
+                          : "border-border bg-card hover:bg-secondary"
+                      }`}
+                    >
+                      <img src={lens.iconUrl} alt="" className="h-4 w-4 rounded-full" />
+                      {lens.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Reorder tray */}
-          <div className="px-4 lg:px-0">
-            <SortableShots shots={shots} onChange={setShots} />
-          </div>
+          <SortableShots shots={shots} onChange={setShots} />
 
           {/* Live Preview */}
-          <div className="px-4 lg:px-0">
-            <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-pop">
-            <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-pop">
+            <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
               <div className="min-w-0">
                 <p className="text-[10px] uppercase tracking-[0.3em] text-gold">Live preview</p>
                 <h2 className="truncate font-display text-2xl">{config.label}</h2>
               </div>
-              <div className="flex flex-wrap shrink-0 items-center gap-2">
+              <div className="flex shrink-0 items-center gap-2">
                 <Select value={exportSize} onValueChange={setExportSize}>
                   <SelectTrigger className="h-9 w-44"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -283,59 +315,41 @@ function FilmBoothPage() {
             <div className="mx-auto max-w-md">
               <FilmStripPreview shots={shots} config={config} />
             </div>
-          </div>
+            {!user && (
+              <p className="mt-4 text-center text-xs text-muted-foreground">
+                Snap as a guest, or sign in to save strips to your cloud gallery.
+              </p>
+            )}
           </div>
         </div>
 
         {/* RIGHT: TEMPLATES + SETTINGS */}
-        <aside className="mt-6 space-y-4 px-4 pb-6 lg:mt-0 lg:px-0 lg:pb-0">
+        <aside className="mt-6 space-y-4 lg:mt-0">
           {/* Template picker */}
           <div className="rounded-3xl border border-gold/20 bg-card/80 p-4 shadow-pop backdrop-blur">
-            <div className="mb-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Link to="/booth" className="rounded-full p-1 text-muted-foreground transition hover:bg-white/10 hover:text-foreground -ml-1">
-                  <ArrowLeft className="h-4 w-4" />
-                </Link>
-                <p className="text-[10px] uppercase tracking-[0.3em] text-gold">Classic Film Strips</p>
-              </div>
+            <div className="mb-3 flex items-baseline justify-between">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-gold">Classic Film Strips</p>
               <span className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">{FILM_STRIP_PRESETS.length} premium</span>
             </div>
-            <div className="relative mb-3">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search templates..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-9 text-sm"
-              />
-            </div>
             <div className="hairline mb-3" />
-            
-            {FILM_STRIP_PRESETS.filter(p => p.label.toLowerCase().includes(searchQuery.toLowerCase())).length > 0 ? (
-              <div className="grid grid-cols-2 gap-2">
-                {FILM_STRIP_PRESETS
-                  .filter(p => p.label.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map((p) => (
-                  <TemplateCard
-                    key={p.id}
-                    config={p}
-                    active={presetId === p.id}
-                    onClick={() => applyPreset(p)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-xs text-muted-foreground py-4">No templates found.</p>
-            )}
+            <div className="grid grid-cols-2 gap-2">
+              {FILM_STRIP_PRESETS.map((p) => (
+                <TemplateCard
+                  key={p.id}
+                  config={p}
+                  active={presetId === p.id}
+                  onClick={() => applyPreset(p)}
+                />
+              ))}
+            </div>
 
-            {customTemplates.filter(t => t.config.label.toLowerCase().includes(searchQuery.toLowerCase())).length > 0 && (
+            {customTemplates.length > 0 && (
               <>
                 <p className="mt-5 mb-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-                  My templates ({customTemplates.filter(t => t.config.label.toLowerCase().includes(searchQuery.toLowerCase())).length})
+                  My templates ({customTemplates.length})
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {customTemplates
-                    .filter(t => t.config.label.toLowerCase().includes(searchQuery.toLowerCase()))
                     .slice()
                     .sort((a, b) => (favorites.includes(b.key) ? 1 : 0) - (favorites.includes(a.key) ? 1 : 0))
                     .map((t) => (

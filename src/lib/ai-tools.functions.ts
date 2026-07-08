@@ -7,25 +7,23 @@ const Input = z.object({
 });
 
 /**
- * Edit an image via OpenRouter API (google/gemini-2.0-flash-exp:free).
+ * Edit an image via Lovable AI Gateway (Nano Banana / Gemini image edit).
  * Returns a PNG data URL.
  */
 export const editImage = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => Input.parse(data))
   .handler(async ({ data }) => {
-    const key = process.env.OPENROUTER_API_KEY;
-    if (!key) throw new Error("Missing OPENROUTER_API_KEY");
+    const key = process.env.LOVABLE_API_KEY;
+    if (!key) throw new Error("Missing LOVABLE_API_KEY");
 
-    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${key}`,
-        "HTTP-Referer": "https://snap-shine-studio.app",
-        "X-Title": "Snap & Shine Studio",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash-exp:free",
+        model: "google/gemini-3.1-flash-image",
         messages: [
           {
             role: "user",
@@ -35,33 +33,29 @@ export const editImage = createServerFn({ method: "POST" })
             ],
           },
         ],
+        modalities: ["image", "text"],
       }),
     });
 
     if (!res.ok) {
       const body = await res.text();
       if (res.status === 429) throw new Error("Rate limited — please try again in a moment.");
-      if (res.status === 402) throw new Error("OpenRouter credits exhausted. Add credits at openrouter.ai.");
+      if (res.status === 402) throw new Error("AI credits exhausted. Add credits in workspace settings.");
       throw new Error(`AI request failed (${res.status}): ${body.slice(0, 200)}`);
     }
 
     const json = (await res.json()) as {
       choices?: Array<{
         message?: {
+          images?: Array<{ image_url?: { url?: string } }>;
           content?: string;
         };
       }>;
     };
 
-    // OpenRouter returns the edited image as a base64 data URL in the content field
-    const content = json.choices?.[0]?.message?.content ?? "";
-
-    // Try to extract a data URL from the content
-    const dataUrlMatch = content.match(/data:image\/[a-z]+;base64,[A-Za-z0-9+/=]+/);
-    if (dataUrlMatch) {
-      return { dataUrl: dataUrlMatch[0] };
+    const url = json.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    if (!url || !url.startsWith("data:")) {
+      throw new Error("AI did not return an image. Try a different photo or prompt.");
     }
-
-    // If the model returned text instead of an image, throw a helpful error
-    throw new Error("AI did not return an image. Try a different photo or prompt.");
+    return { dataUrl: url };
   });

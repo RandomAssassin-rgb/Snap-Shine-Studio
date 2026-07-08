@@ -11,7 +11,7 @@ import { Camera } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [
-    { title: "Sign in - Snap & Shine Studio" },
+    { title: "Sign in — SnapBooth" },
     { name: "description", content: "Sign in to save your strips to your cloud gallery." },
   ] }),
   component: AuthPage,
@@ -71,7 +71,7 @@ function AuthPage() {
       <div className="w-full max-w-md">
         <Link to="/" className="mb-6 inline-flex items-center gap-2 font-display text-2xl font-bold">
           <span className="inline-block h-8 w-8 rounded-full bg-gradient-hero shadow-tape" />
-          Snap &amp; Shine Studio
+          SnapBooth
         </Link>
         <div className="glass rounded-3xl p-8 shadow-pop">
           <h1 className="font-display text-3xl">{mode === "signin" ? "Welcome back" : "Create account"}</h1>

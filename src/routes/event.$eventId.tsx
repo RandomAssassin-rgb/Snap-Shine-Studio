@@ -8,7 +8,7 @@ import { signedUrl } from "@/lib/storage";
 
 export const Route = createFileRoute("/event/$eventId")({
   head: () => ({ meta: [
-    { title: "Live event gallery — Snap & Shine Studio" },
+    { title: "Live event gallery — SnapBooth" },
     { name: "description", content: "Live photobooth gallery. Photos appear as guests take them." },
   ] }),
   component: EventPage,

@@ -79,10 +79,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Snap & Shine Studio — the online photobooth for real moments" },
+      { title: "SnapBooth — the online photobooth for real moments" },
       { name: "description", content: "A playful, browser-based photobooth. Choose a layout, pick filters, count down, snap, and share a beautiful strip in seconds." },
       { name: "theme-color", content: "#fef6e4" },
-      { property: "og:title", content: "Snap & Shine Studio — the online photobooth" },
+      { property: "og:title", content: "SnapBooth — the online photobooth" },
       { property: "og:description", content: "Filters, layouts, live gallery, and one-click sharing. No installs." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

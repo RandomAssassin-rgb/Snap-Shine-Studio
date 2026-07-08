@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { Video as VideoIcon, StopCircle, Download, RotateCcw, Save, Share2, Mic, MicOff } from "lucide-react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { Video as VideoIcon, StopCircle, Download, RotateCcw, Save, Share2, Mic, MicOff, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/site-header";
@@ -11,10 +11,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadBlob } from "@/lib/strip";
 import { shareOrCopy } from "@/lib/share";
+import { initCameraKit, setCameraKitStream, getAvailableLenses, applyLens } from "@/lib/camera-kit";
+import { Lens } from "@snap/camera-kit";
+import { FILTERS, getFilter, combineFilterCss, DEFAULT_ADJUST } from "@/lib/filters";
 
 export const Route = createFileRoute("/video")({
   head: () => ({ meta: [
-    { title: "Video booth — Snap & Shine Studio" },
+    { title: "Video booth — SnapBooth" },
     { name: "description", content: "Record short videos with your webcam, preview, and share." },
   ] }),
   component: VideoBoothPage,
@@ -40,8 +43,14 @@ function VideoBoothPage() {
   const previewRef = useRef<HTMLVideoElement>(null);
   const playbackRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const rawStreamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const arCanvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const [arEnabled, setArEnabled] = useState(false);
+  const [arLenses, setArLenses] = useState<Lens[]>([]);
+  const [filterId, setFilterId] = useState<string>("normal");
 
   const [ready, setReady] = useState(false);
   const [micOn, setMicOn] = useState(true);
@@ -53,11 +62,16 @@ function VideoBoothPage() {
   const [url, setUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  const filter = getFilter(filterId as any);
+  const filterCss = useMemo(() => combineFilterCss(filter, DEFAULT_ADJUST), [filter]);
+
   useEffect(() => { void start(); return () => stopStream(); /* eslint-disable-next-line */ }, [micOn]);
 
   const stopStream = () => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
+    rawStreamRef.current?.getTracks().forEach((t) => t.stop());
+    rawStreamRef.current = null;
   };
 
   async function start() {
@@ -67,9 +81,28 @@ function VideoBoothPage() {
         video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
         audio: micOn,
       });
-      streamRef.current = s;
+      rawStreamRef.current = s;
+
+      if (!arCanvasRef.current) arCanvasRef.current = document.createElement("canvas");
+      const session = await initCameraKit();
+
+      if (session) {
+        setArEnabled(true);
+        setArLenses(getAvailableLenses());
+        await setCameraKitStream(s, arCanvasRef.current);
+        const processedStream = arCanvasRef.current.captureStream(30);
+        
+        // Add microphone track back to the processed video stream
+        const audioTracks = s.getAudioTracks();
+        if (audioTracks.length > 0) processedStream.addTrack(audioTracks[0]);
+        
+        streamRef.current = processedStream;
+      } else {
+        streamRef.current = s;
+      }
+
       if (previewRef.current) {
-        previewRef.current.srcObject = s;
+        previewRef.current.srcObject = streamRef.current;
         await previewRef.current.play().catch(() => {});
       }
       setReady(true);
@@ -148,9 +181,19 @@ function VideoBoothPage() {
   async function share() {
     if (!blob) return;
     const ext = blob.type.includes("mp4") ? "mp4" : "webm";
-    const file = new File([blob], `Snap & Shine Studio.${ext}`, { type: blob.type });
-    await shareOrCopy({ title: "Snap & Shine Studio video", text: "My video 🎥", url: window.location.origin, files: [file] });
+    const file = new File([blob], `snapbooth.${ext}`, { type: blob.type });
+    await shareOrCopy({ title: "SnapBooth video", text: "My video 🎥", url: window.location.origin, files: [file] });
   }
+
+  const handleFilterSelect = (id: string) => {
+    setFilterId(id);
+    const isAr = arLenses.some(l => l.id === id);
+    if (isAr) {
+      applyLens(id);
+    } else {
+      applyLens("");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-soft">
@@ -158,8 +201,18 @@ function VideoBoothPage() {
       <main className="mx-auto max-w-5xl gap-6 py-0 lg:grid lg:grid-cols-[1fr_320px] lg:px-4 lg:py-6">
         <div className="lg:pt-0">
           <div className="relative overflow-hidden bg-black shadow-pop aspect-[3/4] w-full sm:aspect-[4/3] lg:aspect-video lg:rounded-3xl">
-            <video ref={previewRef} autoPlay muted playsInline className={`h-full w-full object-cover ${blob ? "hidden" : ""}`} style={{ transform: "scaleX(-1)" }} />
-            <video ref={playbackRef} playsInline controls className={`h-full w-full object-cover ${blob ? "" : "hidden"}`} />
+            <video ref={previewRef} autoPlay muted playsInline className={`h-full w-full object-cover ${blob ? "hidden" : ""}`} style={{ filter: filterCss, transform: "scaleX(-1)" }} />
+            <video ref={playbackRef} playsInline controls className={`h-full w-full object-cover ${blob ? "" : "hidden"}`} style={{ filter: filterCss }} />
+            {filter.overlay && (
+              <div
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  backgroundColor: filter.overlay.color,
+                  mixBlendMode: filter.overlay.blend as any,
+                  opacity: filter.overlay.opacity,
+                }}
+              />
+            )}
             {countdown !== null && (
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                 <span className="font-display text-[14rem] font-bold text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]">{countdown}</span>
@@ -190,7 +243,7 @@ function VideoBoothPage() {
             )}
             {blob && (
               <>
-                <Button size="lg" onClick={() => downloadBlob(blob, `Snap & Shine Studio-${Date.now()}.${blob.type.includes("mp4") ? "mp4" : "webm"}`)}><Download className="mr-2 h-4 w-4" />Download</Button>
+                <Button size="lg" onClick={() => downloadBlob(blob, `snapbooth-${Date.now()}.${blob.type.includes("mp4") ? "mp4" : "webm"}`)}><Download className="mr-2 h-4 w-4" />Download</Button>
                 <Button size="lg" variant="secondary" onClick={upload} disabled={uploading}><Save className="mr-2 h-4 w-4" />{uploading ? "Uploading…" : "Save"}</Button>
                 <Button size="lg" variant="outline" onClick={share}><Share2 className="mr-2 h-4 w-4" />Share</Button>
                 <Button size="lg" variant="ghost" onClick={reset}><RotateCcw className="mr-2 h-4 w-4" />Retake</Button>
@@ -201,6 +254,40 @@ function VideoBoothPage() {
 
         <aside className="mt-6 space-y-4 px-4 pb-6 lg:mt-0 lg:px-0 lg:pb-0">
           <div className="glass rounded-2xl p-4 space-y-4">
+            {arLenses.length > 0 && (
+              <div>
+                <Label className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-1 mb-2">
+                  <Sparkles className="h-3 w-3" /> AR Lenses
+                </Label>
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {arLenses.map((lens) => (
+                    <button
+                      key={lens.id}
+                      onClick={() => handleFilterSelect(lens.id)}
+                      className={`shrink-0 flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
+                        filterId === lens.id
+                          ? "border-gold bg-gradient-gold text-primary-foreground"
+                          : "border-border bg-card hover:bg-secondary"
+                      }`}
+                    >
+                      <img src={lens.iconUrl} alt="" className="h-4 w-4 rounded-full" />
+                      {lens.name}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => handleFilterSelect("normal")}
+                    className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
+                      filterId === "normal"
+                        ? "border-gold bg-gradient-gold text-primary-foreground"
+                        : "border-border bg-card hover:bg-secondary"
+                    }`}
+                  >
+                    Clear Lens
+                  </button>
+                </div>
+              </div>
+            )}
+            
             <div>
               <Label className="text-xs uppercase tracking-widest text-muted-foreground">Duration</Label>
               <div className="mt-2 grid grid-cols-4 gap-2">

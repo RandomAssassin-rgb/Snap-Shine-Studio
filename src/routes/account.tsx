@@ -13,7 +13,7 @@ import { Copy, QrCode, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/account")({
   head: () => ({ meta: [
-    { title: "Account — Snap & Shine Studio" },
+    { title: "Account — SnapBooth" },
     { name: "description", content: "Manage your account and event galleries." },
   ] }),
   component: AccountPage,

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { signedUrl } from "@/lib/storage";
 
 export const Route = createFileRoute("/print/$stripId")({
-  head: () => ({ meta: [{ title: "Print strip — Snap & Shine Studio" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Print strip — SnapBooth" }, { name: "robots", content: "noindex" }] }),
   component: PrintPage,
 });
 

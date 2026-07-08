@@ -63,6 +63,9 @@ function Index() {
                       <ArrowUpRight className="ml-2 h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                     </Button>
                   </Link>
+                  <Link to="/gallery" className="group inline-flex items-center gap-2 text-sm uppercase tracking-[0.22em] text-foreground/80 hover:text-gold">
+                    <span className="story-link">View the atelier</span>
+                  </Link>
                 </div>
 
                 <div className="mt-14 grid max-w-md grid-cols-3 gap-6 border-t border-border/60 pt-6 text-xs uppercase tracking-[0.18em] text-muted-foreground">
@@ -189,7 +192,7 @@ function Index() {
 
         <footer className="border-t border-border/60 py-10">
           <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 text-xs uppercase tracking-[0.24em] text-muted-foreground md:flex-row">
-            <span>Snap &amp; Shine Studio · Maison Numérique</span>
+            <span>SnapBooth · Maison Numérique</span>
             <span className="text-gold">✦</span>
             <span>© {new Date().getFullYear()} · All frames reserved</span>
           </div>

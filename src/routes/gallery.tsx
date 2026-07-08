@@ -10,7 +10,7 @@ import { signMany } from "@/lib/storage";
 
 export const Route = createFileRoute("/gallery")({
   head: () => ({ meta: [
-    { title: "Gallery — Snap & Shine Studio" },
+    { title: "Gallery — SnapBooth" },
     { name: "description", content: "Your saved photobooth strips." },
   ] }),
   component: GalleryPage,

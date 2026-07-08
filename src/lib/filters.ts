@@ -8,11 +8,7 @@ export type FilterId =
   | "soft" | "pastel" | "hdr" | "highcontrast" | "lowcontrast"
   | "bright" | "dark" | "sharpen" | "noir" | "glow" | "vhs"
   | "retro" | "invert" | "cold" | "candy" | "sunset" | "mono"
-  | "clarity" | "matte"
-  // Snapchat-inspired filters
-  | "twilight" | "bw-glasses" | "cupid" | "polka-nerd" | "pookie"
-  | "blurish" | "retro-heart" | "gray-flash" | "mystic-glow"
-  | "bear-bear" | "webcam-glow" | "motion-blur";
+  | "clarity" | "matte";
 
 export interface FilterPreset {
   id: FilterId;
@@ -53,20 +49,6 @@ export const FILTERS: FilterPreset[] = [
   { id: "mono",         label: "Mono",         css: "grayscale(1) sepia(0.2)" },
   { id: "clarity",      label: "Clarity",      css: "contrast(1.2) saturate(1.15) brightness(1.02)" },
   { id: "matte",        label: "Matte",        css: "contrast(0.9) saturate(0.85) brightness(1.05)" },
-  
-  // Snapchat-inspired presets
-  { id: "twilight",     label: "Twilight camera",css: "saturate(1.2) hue-rotate(15deg) brightness(0.9) contrast(1.1)", overlay: { color: "#4b0082", blend: "screen", opacity: 0.15 } },
-  { id: "bw-glasses",   label: "BW glasses",   css: "grayscale(1) contrast(1.5) brightness(0.9)" },
-  { id: "cupid",        label: "Cupid x crown",css: "saturate(1.3) brightness(1.1)", overlay: { color: "#ffb6c1", blend: "soft-light", opacity: 0.4 } },
-  { id: "polka-nerd",   label: "Dog polka nerd",css: "saturate(1.5) contrast(1.2)", overlay: { color: "#ffeb3b", blend: "overlay", opacity: 0.1 } },
-  { id: "pookie",       label: "Head pookie",  css: "saturate(0.9) brightness(1.15) contrast(0.95)", overlay: { color: "#ffe4e1", blend: "soft-light", opacity: 0.3 } },
-  { id: "blurish",      label: "Blurish",      css: "blur(2px) contrast(1.1) brightness(1.05)" },
-  { id: "retro-heart",  label: "Retro heart flim",css: "sepia(0.4) saturate(1.2) contrast(1.1)", overlay: { color: "#ff4d4d", blend: "soft-light", opacity: 0.25 } },
-  { id: "gray-flash",   label: "Flash in gray",css: "grayscale(0.8) brightness(1.3) contrast(1.2)" },
-  { id: "mystic-glow",  label: "Mystic glow",  css: "saturate(1.4) brightness(1.1) contrast(1.05)", overlay: { color: "#8a2be2", blend: "screen", opacity: 0.2 } },
-  { id: "bear-bear",    label: "We are bear bear",css: "sepia(0.3) saturate(1.2) brightness(0.95) contrast(1.05)", overlay: { color: "#8b4513", blend: "soft-light", opacity: 0.2 } },
-  { id: "webcam-glow",  label: "Webcam glow",  css: "brightness(1.2) contrast(1.1) saturate(1.1) blur(0.5px)", overlay: { color: "#ffffff", blend: "soft-light", opacity: 0.15 } },
-  { id: "motion-blur",  label: "Motion blur",  css: "blur(4px) contrast(1.2) saturate(1.1)" },
 ];
 
 export const getFilter = (id: FilterId): FilterPreset =>
