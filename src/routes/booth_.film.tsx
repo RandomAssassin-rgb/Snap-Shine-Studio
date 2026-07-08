@@ -28,7 +28,7 @@ import { SortableShots } from "@/components/film-strip/SortableShots";
 import { EXPORT_SIZES, exportFilmStrip, downloadBlob, type ExportFormat } from "@/lib/film-strip-export";
 import { filmStripLibrary, type StoredTemplate } from "@/lib/film-strip-library";
 
-export const Route = createFileRoute("/booth/film")({
+export const Route = createFileRoute("/booth_/film")({
   head: () => ({ meta: [
     { title: "Classic Film Strips — SnapBooth" },
     { name: "description", content: "Premium dual vertical film strip templates with live editing, drag reordering and print-quality export." },

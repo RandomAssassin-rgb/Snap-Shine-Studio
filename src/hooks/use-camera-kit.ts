@@ -17,7 +17,7 @@ export function useCameraKit(stream: MediaStream | null) {
       const session = await initCameraKit();
       if (!session || !mounted) return;
 
-      await setCameraKitStream(stream, canvasRef.current);
+      await setCameraKitStream(stream);
       setLenses(getAvailableLenses());
       setIsReady(true);
     }
