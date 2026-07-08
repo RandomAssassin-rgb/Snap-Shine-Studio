@@ -23,9 +23,9 @@ export async function initCameraKit(): Promise<CameraKitSession | null> {
     if (!currentSession) {
       currentSession = await cameraKitInstance.createSession();
       // Load the lens group
-      const lensGroup = await cameraKitInstance.lensRepository.loadLensGroups([LENS_GROUP_ID]);
-      // Extract lenses from the group
-      availableLenses = lensGroup?.lenses || [];
+      const lensGroups = await cameraKitInstance.lensRepository.loadLensGroups([LENS_GROUP_ID]);
+      // Extract lenses from the first group
+      availableLenses = lensGroups[0]?.lenses || [];
       console.log(`Loaded ${availableLenses.length} lenses from group ${LENS_GROUP_ID}`);
     }
 
