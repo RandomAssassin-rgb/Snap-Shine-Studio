@@ -4,6 +4,7 @@ import { Video as VideoIcon, StopCircle, Download, RotateCcw, Save, Share2, Mic,
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/site-header";
+import { VerticalFilterRail, MobileFilterStrip } from "@/components/filter-picker";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -198,7 +199,14 @@ function VideoBoothPage() {
   return (
     <div className="min-h-screen bg-gradient-soft">
       <SiteHeader />
-      <main className="mx-auto max-w-5xl gap-6 py-0 lg:grid lg:grid-cols-[1fr_320px] lg:px-4 lg:py-6">
+      <main className="mx-auto max-w-6xl gap-6 py-0 lg:grid lg:grid-cols-[112px_1fr_320px] lg:px-4 lg:py-6">
+        {/* VERTICAL FILTER RAIL */}
+        <VerticalFilterRail
+          arLenses={arLenses}
+          activeFilterId={filterId}
+          onFilterSelect={handleFilterSelect}
+        />
+
         <div className="lg:pt-0">
           <div className="relative overflow-hidden bg-black shadow-pop aspect-[3/4] w-full sm:aspect-[4/3] lg:aspect-video lg:rounded-3xl">
             <video ref={previewRef} autoPlay muted playsInline className={`h-full w-full object-cover ${blob ? "hidden" : ""}`} style={{ filter: filterCss, transform: "scaleX(-1)" }} />
@@ -253,41 +261,13 @@ function VideoBoothPage() {
         </div>
 
         <aside className="mt-6 space-y-4 px-4 pb-6 lg:mt-0 lg:px-0 lg:pb-0">
+          {/* Mobile filter strip */}
+          <MobileFilterStrip
+            arLenses={arLenses}
+            activeFilterId={filterId}
+            onFilterSelect={handleFilterSelect}
+          />
           <div className="glass rounded-2xl p-4 space-y-4">
-            {arLenses.length > 0 && (
-              <div>
-                <Label className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-1 mb-2">
-                  <Sparkles className="h-3 w-3" /> AR Lenses
-                </Label>
-                <div className="flex gap-2 overflow-x-auto pb-2">
-                  {arLenses.map((lens) => (
-                    <button
-                      key={lens.id}
-                      onClick={() => handleFilterSelect(lens.id)}
-                      className={`shrink-0 flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
-                        filterId === lens.id
-                          ? "border-gold bg-gradient-gold text-primary-foreground"
-                          : "border-border bg-card hover:bg-secondary"
-                      }`}
-                    >
-                      <img src={lens.iconUrl} alt="" className="h-4 w-4 rounded-full" />
-                      {lens.name}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => handleFilterSelect("normal")}
-                    className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
-                      filterId === "normal"
-                        ? "border-gold bg-gradient-gold text-primary-foreground"
-                        : "border-border bg-card hover:bg-secondary"
-                    }`}
-                  >
-                    Clear Lens
-                  </button>
-                </div>
-              </div>
-            )}
-            
             <div>
               <Label className="text-xs uppercase tracking-widest text-muted-foreground">Duration</Label>
               <div className="mt-2 grid grid-cols-4 gap-2">

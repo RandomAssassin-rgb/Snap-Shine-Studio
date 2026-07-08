@@ -8,6 +8,8 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { VerticalFilterRail, MobileFilterStrip } from "@/components/filter-picker";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -234,69 +236,11 @@ function BoothPage() {
 
       <main className="mx-auto max-w-[1600px] gap-6 px-4 py-6 lg:grid lg:grid-cols-[112px_1fr_380px]">
         {/* VERTICAL FILTER RAIL */}
-        <aside className="hidden lg:block">
-          <div className="sticky top-20 rounded-3xl border border-gold/20 bg-card/60 p-3 shadow-pop backdrop-blur">
-            <p className="mb-3 px-1 text-center text-[9px] uppercase tracking-[0.32em] text-gold">Filtres</p>
-            <div className="hairline mb-3" />
-            <div className="max-h-[70vh] space-y-1.5 overflow-y-auto pr-1">
-              {/* AR Lenses from Snap Camera Kit */}
-              {cam.arLenses.map((lens) => {
-                const active = filterId === lens.id;
-                return (
-                  <button
-                    key={lens.id}
-                    onClick={() => handleFilterSelect(lens.id)}
-                    className={`group relative flex w-full flex-col items-center gap-1 rounded-2xl border p-2 transition ${
-                      active
-                        ? "border-gold/70 bg-gradient-gold text-primary-foreground shadow-glow"
-                        : "border-transparent hover:border-gold/30 hover:bg-secondary/60"
-                    }`}
-                    title={lens.name}
-                  >
-                    <img
-                      src={lens.iconUrl}
-                      alt={lens.name}
-                      className={`h-10 w-10 rounded-xl object-cover ring-1 ring-inset ${active ? "ring-white/40" : "ring-border/60"}`}
-                    />
-                    <span className={`w-full truncate text-center text-[9px] font-medium uppercase tracking-[0.14em] ${active ? "text-primary-foreground" : "text-muted-foreground"}`}>
-                      {lens.name}
-                    </span>
-                  </button>
-                );
-              })}
-
-              {/* Standard CSS Filters */}
-              {FILTERS.map((f) => {
-                const active = filterId === f.id;
-                return (
-                  <button
-                    key={f.id}
-                    onClick={() => handleFilterSelect(f.id)}
-                    className={`group relative flex w-full flex-col items-center gap-1 rounded-2xl border p-2 transition ${
-                      active
-                        ? "border-gold/70 bg-gradient-gold text-primary-foreground shadow-glow"
-                        : "border-transparent hover:border-gold/30 hover:bg-secondary/60"
-                    }`}
-                    title={f.label}
-                  >
-                    <span
-                      aria-hidden
-                      className={`h-10 w-10 rounded-xl ring-1 ring-inset ${active ? "ring-white/40" : "ring-border/60"}`}
-                      style={{
-                        backgroundImage:
-                          "linear-gradient(135deg,#8a6a2c 0%,#d4af5a 45%,#3a2a1a 100%)",
-                        filter: f.css === "none" ? undefined : f.css,
-                      }}
-                    />
-                    <span className={`w-full truncate text-center text-[9px] font-medium uppercase tracking-[0.14em] ${active ? "text-primary-foreground" : "text-muted-foreground"}`}>
-                      {f.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </aside>
+        <VerticalFilterRail
+          arLenses={cam.arLenses}
+          activeFilterId={filterId}
+          onFilterSelect={handleFilterSelect}
+        />
 
         {/* CAMERA COLUMN */}
         <div>
@@ -439,38 +383,11 @@ function BoothPage() {
           )}
 
           {/* Mobile filter strip (lg rail replaces this on desktop) */}
-          <div className="mt-4 lg:hidden">
-            <p className="mb-2 text-[10px] uppercase tracking-[0.3em] text-gold">Filters</p>
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {cam.arLenses.map((lens) => (
-                <button
-                  key={lens.id}
-                  onClick={() => handleFilterSelect(lens.id)}
-                  className={`shrink-0 flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
-                    filterId === lens.id
-                      ? "border-gold bg-gradient-gold text-primary-foreground"
-                      : "border-border bg-card hover:bg-secondary"
-                  }`}
-                >
-                  <img src={lens.iconUrl} alt="" className="h-4 w-4 rounded-full" />
-                  {lens.name}
-                </button>
-              ))}
-              {FILTERS.map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => handleFilterSelect(f.id)}
-                  className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
-                    filterId === f.id
-                      ? "border-gold bg-gradient-gold text-primary-foreground"
-                      : "border-border bg-card hover:bg-secondary"
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <MobileFilterStrip
+            arLenses={cam.arLenses}
+            activeFilterId={filterId}
+            onFilterSelect={handleFilterSelect}
+          />
         </div>
 
         {/* SIDE PANEL */}

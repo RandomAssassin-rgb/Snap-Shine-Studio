@@ -25,6 +25,7 @@ import { FILTERS } from "@/lib/filters";
 import { FilmStripPreview } from "@/components/film-strip/FilmStripPreview";
 import { FilmStripEditor } from "@/components/film-strip/FilmStripEditor";
 import { SortableShots } from "@/components/film-strip/SortableShots";
+import { VerticalFilterRail, MobileFilterStrip } from "@/components/filter-picker";
 import { EXPORT_SIZES, exportFilmStrip, downloadBlob, type ExportFormat } from "@/lib/film-strip-export";
 import { filmStripLibrary, type StoredTemplate } from "@/lib/film-strip-library";
 
@@ -201,9 +202,16 @@ function FilmBoothPage() {
     <div className="min-h-screen bg-gradient-soft grain">
       <SiteHeader />
 
-      <main className="mx-auto max-w-[1600px] gap-6 px-4 py-6 lg:grid lg:grid-cols-[1fr_400px]">
+      <main className="mx-auto max-w-[1600px] gap-6 px-4 py-6 lg:grid lg:grid-cols-[112px_1fr_400px]">
+        {/* VERTICAL FILTER RAIL */}
+        <VerticalFilterRail
+          arLenses={cam.arLenses}
+          activeFilterId={filterId}
+          onFilterSelect={(id) => { setFilterId(id); cam.setLens(cam.arLenses.some(l => l.id === id) ? id : null); }}
+        />
+
         {/* LEFT: CAMERA + PREVIEW */}
-        <div className="space-y-5">
+        <div className="space-y-5 lg:pt-0">
           {/* Camera */}
           <div className="relative overflow-hidden rounded-3xl bg-black shadow-pop">
             <div className="relative aspect-video w-full">
@@ -263,51 +271,12 @@ function FilmBoothPage() {
               {shots.length > 0 && <Button variant="outline" size="icon" onClick={clearAll} title="Clear"><Trash2 className="h-4 w-4" /></Button>}
             </div>
             
-            {/* Filters & AR Lenses */}
-            <div className="border-t border-border/20 bg-card p-3">
-              <p className="mb-2 text-[10px] uppercase tracking-[0.3em] text-gold flex items-center gap-1">
-                <Sparkles className="h-3 w-3" /> Filters & Lenses
-              </p>
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                {cam.arLenses.map((lens) => (
-                  <button
-                    key={lens.id}
-                    onClick={() => { setFilterId(lens.id); cam.setLens(lens.id); }}
-                    className={`shrink-0 flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
-                      filterId === lens.id
-                        ? "border-gold bg-gradient-gold text-primary-foreground"
-                        : "border-border bg-card hover:bg-secondary"
-                    }`}
-                  >
-                    <img src={lens.iconUrl} alt="" className="h-4 w-4 rounded-full object-cover" />
-                    {lens.name}
-                  </button>
-                ))}
-                
-                {FILTERS.map((f) => (
-                  <button
-                    key={f.id}
-                    onClick={() => { setFilterId(f.id); cam.setLens(null); }}
-                    className={`shrink-0 flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
-                      filterId === f.id
-                        ? "border-gold bg-gradient-gold text-primary-foreground"
-                        : "border-border bg-card hover:bg-secondary"
-                    }`}
-                  >
-                    {f.css !== "none" && (
-                      <span
-                        className="h-4 w-4 rounded-full ring-1 ring-inset ring-white/20"
-                        style={{
-                          backgroundImage: "linear-gradient(135deg,#8a6a2c 0%,#d4af5a 45%,#3a2a1a 100%)",
-                          filter: f.css,
-                        }}
-                      />
-                    )}
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* Mobile Filter Strip */}
+            <MobileFilterStrip
+              arLenses={cam.arLenses}
+              activeFilterId={filterId}
+              onFilterSelect={(id) => { setFilterId(id); cam.setLens(cam.arLenses.some(l => l.id === id) ? id : null); }}
+            />
           </div>
 
           {/* Reorder tray */}
