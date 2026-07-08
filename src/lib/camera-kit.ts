@@ -51,14 +51,21 @@ export async function applyLens(lensId: string) {
   }
 }
 
-export async function setCameraKitStream(mediaStream: MediaStream, renderTarget: HTMLCanvasElement) {
-  if (!currentSession) return;
+export async function setCameraKitStream(mediaStream: MediaStream): Promise<MediaStream | null> {
+  if (!currentSession) return null;
   
   // Set the source stream (the webcam)
   await currentSession.setSource(mediaStream);
   
-  // Set the output canvas where the AR is rendered
-  currentSession.play(renderTarget);
+  // Start the AR rendering pipeline
+  currentSession.play("live");
+
+  // Get the SDK's internal output canvas
+  const outCanvas = currentSession.output.live as HTMLCanvasElement;
+  if (outCanvas) {
+    return outCanvas.captureStream(30);
+  }
+  return null;
 }
 
 export function destroyCameraKitSession() {

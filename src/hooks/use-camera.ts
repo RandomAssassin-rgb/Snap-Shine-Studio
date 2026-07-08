@@ -23,7 +23,6 @@ export function useCamera() {
   const [arEnabled, setArEnabled] = useState(false);
   const [arLenses, setArLenses] = useState<Lens[]>([]);
   const [activeLensId, setActiveLensId] = useState<string | null>(null);
-  const arCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const rawStreamRef = useRef<MediaStream | null>(null);
 
   const stop = useCallback(() => {
@@ -71,23 +70,20 @@ export function useCamera() {
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       rawStreamRef.current = stream;
 
-      // Initialize AR Canvas if missing
-      if (!arCanvasRef.current) {
-        arCanvasRef.current = document.createElement("canvas");
-      }
-
       // Try to boot Camera Kit
       const session = await initCameraKit();
-      if (session && arCanvasRef.current) {
+      if (session) {
         setArEnabled(true);
         setArLenses(getAvailableLenses());
         
-        // Pipe stream through Snap SDK
-        await setCameraKitStream(stream, arCanvasRef.current);
+        // Pipe stream through Snap SDK and get AR stream
+        const processedStream = await setCameraKitStream(stream);
         
-        // Extract the processed AR stream and feed it to the UI
-        const processedStream = arCanvasRef.current.captureStream(30);
-        streamRef.current = processedStream;
+        if (processedStream) {
+          streamRef.current = processedStream;
+        } else {
+          streamRef.current = stream;
+        }
       } else {
         // Fallback to raw stream if SDK fails
         streamRef.current = stream;

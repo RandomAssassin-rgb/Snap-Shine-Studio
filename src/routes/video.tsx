@@ -46,7 +46,6 @@ function VideoBoothPage() {
   const rawStreamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const arCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const [arEnabled, setArEnabled] = useState(false);
   const [arLenses, setArLenses] = useState<Lens[]>([]);
@@ -83,20 +82,21 @@ function VideoBoothPage() {
       });
       rawStreamRef.current = s;
 
-      if (!arCanvasRef.current) arCanvasRef.current = document.createElement("canvas");
       const session = await initCameraKit();
 
       if (session) {
         setArEnabled(true);
         setArLenses(getAvailableLenses());
-        await setCameraKitStream(s, arCanvasRef.current);
-        const processedStream = arCanvasRef.current.captureStream(30);
+        const processedStream = await setCameraKitStream(s);
         
-        // Add microphone track back to the processed video stream
-        const audioTracks = s.getAudioTracks();
-        if (audioTracks.length > 0) processedStream.addTrack(audioTracks[0]);
-        
-        streamRef.current = processedStream;
+        if (processedStream) {
+          // Add microphone track back to the processed video stream
+          const audioTracks = s.getAudioTracks();
+          if (audioTracks.length > 0) processedStream.addTrack(audioTracks[0]);
+          streamRef.current = processedStream;
+        } else {
+          streamRef.current = s;
+        }
       } else {
         streamRef.current = s;
       }
