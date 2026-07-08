@@ -20,7 +20,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PrintStripIdRouteImport } from './routes/print.$stripId'
 import { Route as EventEventIdRouteImport } from './routes/event.$eventId'
 import { Route as EditStripIdRouteImport } from './routes/edit.$stripId'
-import { Route as BoothFilmRouteImport } from './routes/booth.film'
+import { Route as BoothFilmRouteImport } from './routes/booth_.film'
 
 const VideoRoute = VideoRouteImport.update({
   id: '/video',
@@ -78,9 +78,9 @@ const EditStripIdRoute = EditStripIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const BoothFilmRoute = BoothFilmRouteImport.update({
-  id: '/film',
-  path: '/film',
-  getParentRoute: () => BoothRoute,
+  id: '/booth_/film',
+  path: '/booth/film',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -88,7 +88,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
-  '/booth': typeof BoothRouteWithChildren
+  '/booth': typeof BoothRoute
   '/gallery': typeof GalleryRoute
   '/tools': typeof ToolsRoute
   '/video': typeof VideoRoute
@@ -102,7 +102,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
-  '/booth': typeof BoothRouteWithChildren
+  '/booth': typeof BoothRoute
   '/gallery': typeof GalleryRoute
   '/tools': typeof ToolsRoute
   '/video': typeof VideoRoute
@@ -117,11 +117,11 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
-  '/booth': typeof BoothRouteWithChildren
+  '/booth': typeof BoothRoute
   '/gallery': typeof GalleryRoute
   '/tools': typeof ToolsRoute
   '/video': typeof VideoRoute
-  '/booth/film': typeof BoothFilmRoute
+  '/booth_/film': typeof BoothFilmRoute
   '/edit/$stripId': typeof EditStripIdRoute
   '/event/$eventId': typeof EventEventIdRoute
   '/print/$stripId': typeof PrintStripIdRoute
@@ -165,7 +165,7 @@ export interface FileRouteTypes {
     | '/gallery'
     | '/tools'
     | '/video'
-    | '/booth/film'
+    | '/booth_/film'
     | '/edit/$stripId'
     | '/event/$eventId'
     | '/print/$stripId'
@@ -176,10 +176,11 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
-  BoothRoute: typeof BoothRouteWithChildren
+  BoothRoute: typeof BoothRoute
   GalleryRoute: typeof GalleryRoute
   ToolsRoute: typeof ToolsRoute
   VideoRoute: typeof VideoRoute
+  BoothFilmRoute: typeof BoothFilmRoute
   EditStripIdRoute: typeof EditStripIdRoute
   EventEventIdRoute: typeof EventEventIdRoute
   PrintStripIdRoute: typeof PrintStripIdRoute
@@ -264,35 +265,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditStripIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/booth/film': {
-      id: '/booth/film'
-      path: '/film'
+    '/booth_/film': {
+      id: '/booth_/film'
+      path: '/booth/film'
       fullPath: '/booth/film'
       preLoaderRoute: typeof BoothFilmRouteImport
-      parentRoute: typeof BoothRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
-
-interface BoothRouteChildren {
-  BoothFilmRoute: typeof BoothFilmRoute
-}
-
-const BoothRouteChildren: BoothRouteChildren = {
-  BoothFilmRoute: BoothFilmRoute,
-}
-
-const BoothRouteWithChildren = BoothRoute._addFileChildren(BoothRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
-  BoothRoute: BoothRouteWithChildren,
+  BoothRoute: BoothRoute,
   GalleryRoute: GalleryRoute,
   ToolsRoute: ToolsRoute,
   VideoRoute: VideoRoute,
+  BoothFilmRoute: BoothFilmRoute,
   EditStripIdRoute: EditStripIdRoute,
   EventEventIdRoute: EventEventIdRoute,
   PrintStripIdRoute: PrintStripIdRoute,
@@ -300,3 +292,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
