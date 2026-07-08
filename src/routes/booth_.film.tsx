@@ -21,6 +21,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { FILM_STRIP_PRESETS, getFilmStripPreset } from "@/lib/film-strip-presets";
 import type { FilmStripConfig } from "@/lib/film-strip";
 import { totalShots } from "@/lib/film-strip";
+import { FILTERS } from "@/lib/filters";
 import { FilmStripPreview } from "@/components/film-strip/FilmStripPreview";
 import { FilmStripEditor } from "@/components/film-strip/FilmStripEditor";
 import { SortableShots } from "@/components/film-strip/SortableShots";
@@ -43,7 +44,10 @@ function FilmBoothPage() {
   const cam = useCamera();
 
   const [presetId, setPresetId] = useState<string>(FILM_STRIP_PRESETS[0].id);
-  const [activeLensId, setActiveLensId] = useState<string>("normal");
+  const [filterId, setFilterId] = useState<string>("none");
+  const filter = FILTERS.find((f) => f.id === filterId) ?? FILTERS[0];
+  const filterCss = filter.css === "none" ? undefined : filter.css;
+
   const [config, setConfig] = useState<FilmStripConfig>(FILM_STRIP_PRESETS[0]);
   const [shots, setShots] = useState<HTMLCanvasElement[]>([]);
   const [capturing, setCapturing] = useState(false);
@@ -100,12 +104,12 @@ function FilmBoothPage() {
   }, [sound]);
 
   const doCapture = useCallback(() => {
-    const c = cam.capture("none", cam.mirror);
+    const c = cam.capture(filter.css, cam.mirror);
     if (!c) { toast.error("Camera not ready"); return null; }
     if (flash) { setFlashOn(true); setTimeout(() => setFlashOn(false), 150); }
     playShutter();
     return c;
-  }, [cam, flash, playShutter]);
+  }, [cam, flash, playShutter, filter.css]);
 
   const runCaptureAll = useCallback(async () => {
     if (capturing) return;
@@ -207,8 +211,19 @@ function FilmBoothPage() {
                 ref={cam.videoRef}
                 autoPlay muted playsInline
                 className="h-full w-full object-cover"
-                style={{ transform: cam.mirror ? "scaleX(-1)" : "none" }}
+                style={{ filter: filterCss, transform: cam.mirror ? "scaleX(-1)" : "none" }}
               />
+              {/* Filter color overlay */}
+              {filter.overlay && (
+                <div
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    backgroundColor: filter.overlay.color,
+                    mixBlendMode: filter.overlay.blend as React.CSSProperties["mixBlendMode"],
+                    opacity: filter.overlay.opacity,
+                  }}
+                />
+              )}
               <div className="absolute left-4 top-4 flex gap-2 rounded-full bg-black/50 px-3 py-1.5 backdrop-blur">
                 {Array.from({ length: need }).map((_, i) => (
                   <span key={i} className={`h-2 w-2 rounded-full ${i < shots.length ? "bg-gold" : "bg-white/30"}`} />
@@ -248,40 +263,51 @@ function FilmBoothPage() {
               {shots.length > 0 && <Button variant="outline" size="icon" onClick={clearAll} title="Clear"><Trash2 className="h-4 w-4" /></Button>}
             </div>
             
-            {/* AR Lenses */}
-            {cam.arLenses.length > 0 && (
-              <div className="border-t border-border/20 bg-card p-3">
-                <p className="mb-2 text-[10px] uppercase tracking-[0.3em] text-gold flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" /> AR Lenses
-                </p>
-                <div className="flex gap-2 overflow-x-auto pb-1">
+            {/* Filters & AR Lenses */}
+            <div className="border-t border-border/20 bg-card p-3">
+              <p className="mb-2 text-[10px] uppercase tracking-[0.3em] text-gold flex items-center gap-1">
+                <Sparkles className="h-3 w-3" /> Filters & Lenses
+              </p>
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {cam.arLenses.map((lens) => (
                   <button
-                    onClick={() => { setActiveLensId("normal"); cam.setLens(null); }}
-                    className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
-                      activeLensId === "normal"
+                    key={lens.id}
+                    onClick={() => { setFilterId(lens.id); cam.setLens(lens.id); }}
+                    className={`shrink-0 flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
+                      filterId === lens.id
                         ? "border-gold bg-gradient-gold text-primary-foreground"
                         : "border-border bg-card hover:bg-secondary"
                     }`}
                   >
-                    Clear Lens
+                    <img src={lens.iconUrl} alt="" className="h-4 w-4 rounded-full object-cover" />
+                    {lens.name}
                   </button>
-                  {cam.arLenses.map((lens) => (
-                    <button
-                      key={lens.id}
-                      onClick={() => { setActiveLensId(lens.id); cam.setLens(lens.id); }}
-                      className={`shrink-0 flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
-                        activeLensId === lens.id
-                          ? "border-gold bg-gradient-gold text-primary-foreground"
-                          : "border-border bg-card hover:bg-secondary"
-                      }`}
-                    >
-                      <img src={lens.iconUrl} alt="" className="h-4 w-4 rounded-full" />
-                      {lens.name}
-                    </button>
-                  ))}
-                </div>
+                ))}
+                
+                {FILTERS.map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => { setFilterId(f.id); cam.setLens(null); }}
+                    className={`shrink-0 flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
+                      filterId === f.id
+                        ? "border-gold bg-gradient-gold text-primary-foreground"
+                        : "border-border bg-card hover:bg-secondary"
+                    }`}
+                  >
+                    {f.css !== "none" && (
+                      <span
+                        className="h-4 w-4 rounded-full ring-1 ring-inset ring-white/20"
+                        style={{
+                          backgroundImage: "linear-gradient(135deg,#8a6a2c 0%,#d4af5a 45%,#3a2a1a 100%)",
+                          filter: f.css,
+                        }}
+                      />
+                    )}
+                    {f.label}
+                  </button>
+                ))}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Reorder tray */}
