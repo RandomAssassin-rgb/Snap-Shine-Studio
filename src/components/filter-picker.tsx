@@ -1,5 +1,6 @@
-import { FILTERS } from "@/lib/filters";
 import type { Lens } from "@snap/camera-kit";
+import { CUSTOM_AR_LENSES } from "@/hooks/use-custom-ar";
+import { FILTERS } from "@/lib/filters";
 
 interface FilterPickerProps {
   arLenses: Lens[];
@@ -32,6 +33,32 @@ export function VerticalFilterRail({ arLenses, activeFilterId, onFilterSelect }:
                   src={lens.iconUrl}
                   alt={lens.name}
                   className={`h-10 w-10 rounded-xl object-cover ring-1 ring-inset ${active ? "ring-white/40" : "ring-border/60"}`}
+                />
+                <span className={`w-full truncate text-center text-[9px] font-medium uppercase tracking-[0.14em] ${active ? "text-primary-foreground" : "text-muted-foreground"}`}>
+                  {lens.name}
+                </span>
+              </button>
+            );
+          })}
+
+          {/* Custom Studio AR Lenses */}
+          {CUSTOM_AR_LENSES.map((lens) => {
+            const active = activeFilterId === lens.id;
+            return (
+              <button
+                key={lens.id}
+                onClick={() => onFilterSelect(lens.id)}
+                className={`group relative flex w-full flex-col items-center gap-1 rounded-2xl border p-2 transition ${
+                  active
+                    ? "border-gold/70 bg-gradient-gold text-primary-foreground shadow-glow"
+                    : "border-transparent hover:border-gold/30 hover:bg-secondary/60"
+                }`}
+                title={lens.name}
+              >
+                <img
+                  src={lens.iconUrl}
+                  alt={lens.name}
+                  className={`h-10 w-10 rounded-xl object-cover ring-1 ring-inset bg-card ${active ? "ring-white/40" : "ring-border/60"}`}
                 />
                 <span className={`w-full truncate text-center text-[9px] font-medium uppercase tracking-[0.14em] ${active ? "text-primary-foreground" : "text-muted-foreground"}`}>
                   {lens.name}
@@ -90,6 +117,20 @@ export function MobileFilterStrip({ arLenses, activeFilterId, onFilterSelect }: 
             }`}
           >
             <img src={lens.iconUrl} alt="" className="h-4 w-4 rounded-full object-cover ring-1 ring-white/20" />
+            {lens.name}
+          </button>
+        ))}
+        {CUSTOM_AR_LENSES.map((lens) => (
+          <button
+            key={lens.id}
+            onClick={() => onFilterSelect(lens.id)}
+            className={`shrink-0 flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition ${
+              activeFilterId === lens.id
+                ? "border-gold bg-gradient-gold text-primary-foreground shadow-glow"
+                : "border-transparent bg-card hover:border-gold/30 hover:bg-secondary/60"
+            }`}
+          >
+            <img src={lens.iconUrl} alt="" className="h-4 w-4 rounded-full object-cover ring-1 ring-white/20 bg-card" />
             {lens.name}
           </button>
         ))}

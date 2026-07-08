@@ -147,8 +147,8 @@ export function useCamera() {
     }
   }, [refreshDevices]);
 
-  /** Capture a frame from the video stream into an offscreen canvas, applying a CSS filter string. */
-  const capture = useCallback((filterCss: string, applyMirror: boolean = mirror): HTMLCanvasElement | null => {
+  /** Capture a frame from the video stream into an offscreen canvas, applying a CSS filter string and an optional AR canvas overlay. */
+  const capture = useCallback((filterCss: string, applyMirror: boolean = mirror, overlayCanvas?: HTMLCanvasElement | null): HTMLCanvasElement | null => {
     const video = videoRef.current;
     if (!video || video.readyState < 2) return null;
     const w = video.videoWidth;
@@ -159,11 +159,23 @@ export function useCamera() {
     canvas.height = h;
     const ctx = canvas.getContext("2d")!;
     ctx.filter = filterCss && filterCss !== "none" ? filterCss : "none";
+    
     if (applyMirror) {
       ctx.translate(w, 0);
       ctx.scale(-1, 1);
     }
+    
+    // Draw Video feed
     ctx.drawImage(video, 0, 0, w, h);
+    
+    // Reset mirror transform to draw overlay properly (if we mirrored above)
+    // Wait, the AR canvas is ALREADY drawn matching the video's original unmirrored stream!
+    // So we just draw it right over the video, keeping the same mirror settings we applied.
+    if (overlayCanvas) {
+      // Temporarily remove the CSS filter since the AR canvas shouldn't be color-graded (or should it? Yes, we want the filter to apply to the AR elements too if possible, but the `filter` on canvas context applies to ALL draws. Let's keep it).
+      ctx.drawImage(overlayCanvas, 0, 0, w, h);
+    }
+
     return canvas;
   }, [mirror]);
 

@@ -26,6 +26,7 @@ import { FilmStripPreview } from "@/components/film-strip/FilmStripPreview";
 import { FilmStripEditor } from "@/components/film-strip/FilmStripEditor";
 import { SortableShots } from "@/components/film-strip/SortableShots";
 import { VerticalFilterRail, MobileFilterStrip } from "@/components/filter-picker";
+import { useCustomAR } from "@/hooks/use-custom-ar";
 import { EXPORT_SIZES, exportFilmStrip, downloadBlob, type ExportFormat } from "@/lib/film-strip-export";
 import { filmStripLibrary, type StoredTemplate } from "@/lib/film-strip-library";
 
@@ -43,12 +44,15 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 function FilmBoothPage() {
   const { user } = useAuth();
   const cam = useCamera();
-
-  const [presetId, setPresetId] = useState<string>(FILM_STRIP_PRESETS[0].id);
   const [filterId, setFilterId] = useState<string>("none");
+  
+  const arCanvasRef = useRef<HTMLCanvasElement>(null);
+  useCustomAR(cam.videoRef, arCanvasRef, filterId);
+
   const filter = FILTERS.find((f) => f.id === filterId) ?? FILTERS[0];
   const filterCss = filter.css === "none" ? undefined : filter.css;
 
+  const [presetId, setPresetId] = useState<string>(FILM_STRIP_PRESETS[0].id);
   const [config, setConfig] = useState<FilmStripConfig>(FILM_STRIP_PRESETS[0]);
   const [shots, setShots] = useState<HTMLCanvasElement[]>([]);
   const [capturing, setCapturing] = useState(false);
@@ -105,12 +109,12 @@ function FilmBoothPage() {
   }, [sound]);
 
   const doCapture = useCallback(() => {
-    const c = cam.capture(filter.css, cam.mirror);
+    const c = cam.capture(filterCss || "none", cam.mirror, arCanvasRef.current);
     if (!c) { toast.error("Camera not ready"); return null; }
     if (flash) { setFlashOn(true); setTimeout(() => setFlashOn(false), 150); }
     playShutter();
     return c;
-  }, [cam, flash, playShutter, filter.css]);
+  }, [cam, flash, playShutter, filter.css, filterCss]);
 
   const runCaptureAll = useCallback(async () => {
     if (capturing) return;
@@ -219,7 +223,15 @@ function FilmBoothPage() {
                 ref={cam.videoRef}
                 autoPlay muted playsInline
                 className="h-full w-full object-cover"
-                style={{ filter: filterCss, transform: cam.mirror ? "scaleX(-1)" : "none" }}
+                style={{
+                  filter: filterCss,
+                  transform: cam.mirror ? "scaleX(-1)" : "none",
+                }}
+              />
+              <canvas
+                ref={arCanvasRef}
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+                style={{ transform: cam.mirror ? "scaleX(-1)" : "none" }}
               />
               {/* Filter color overlay */}
               {filter.overlay && (

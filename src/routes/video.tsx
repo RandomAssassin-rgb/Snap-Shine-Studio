@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/site-header";
 import { VerticalFilterRail, MobileFilterStrip } from "@/components/filter-picker";
+import { useCustomAR } from "@/hooks/use-custom-ar";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -43,6 +44,8 @@ function VideoBoothPage() {
   const { user } = useAuth();
   const previewRef = useRef<HTMLVideoElement>(null);
   const playbackRef = useRef<HTMLVideoElement>(null);
+  const arCanvasRef = useRef<HTMLCanvasElement>(null);
+
   const streamRef = useRef<MediaStream | null>(null);
   const rawStreamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -51,6 +54,9 @@ function VideoBoothPage() {
   const [arEnabled, setArEnabled] = useState(false);
   const [arLenses, setArLenses] = useState<Lens[]>([]);
   const [filterId, setFilterId] = useState<string>("normal");
+
+  // Apply custom AR
+  useCustomAR(previewRef, arCanvasRef, filterId);
 
   const [ready, setReady] = useState(false);
   const [micOn, setMicOn] = useState(true);
@@ -210,6 +216,11 @@ function VideoBoothPage() {
         <div className="lg:pt-0">
           <div className="relative overflow-hidden bg-black shadow-pop aspect-[3/4] w-full sm:aspect-[4/3] lg:aspect-video lg:rounded-3xl">
             <video ref={previewRef} autoPlay muted playsInline className={`h-full w-full object-cover ${blob ? "hidden" : ""}`} style={{ filter: filterCss, transform: "scaleX(-1)" }} />
+            <canvas
+              ref={arCanvasRef}
+              className={`pointer-events-none absolute inset-0 h-full w-full object-cover ${blob ? "hidden" : ""}`}
+              style={{ transform: "scaleX(-1)" }}
+            />
             <video ref={playbackRef} playsInline controls className={`h-full w-full object-cover ${blob ? "" : "hidden"}`} style={{ filter: filterCss }} />
             {filter.overlay && (
               <div

@@ -10,6 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { VerticalFilterRail, MobileFilterStrip } from "@/components/filter-picker";
+import { useCustomAR } from "@/hooks/use-custom-ar";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -34,11 +35,16 @@ type CountdownOpt = 0 | 3 | 5 | 10;
 
 function BoothPage() {
   const { user } = useAuth();
+  const arCanvasRef = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
 
   const cam = useCamera();
   const [filterId, setFilterId] = useState<FilterId | string>("normal");
   const [adjust, setAdjust] = useState<LiveAdjust>(DEFAULT_ADJUST);
+  
+  // Apply Custom AR Engine
+  useCustomAR(cam.videoRef, arCanvasRef, filterId);
+
   const [layoutId, setLayoutId] = useState<LayoutId>("three");
   const [countdown, setCountdown] = useState<CountdownOpt>(3);
   const [flash, setFlash] = useState(true);
@@ -100,7 +106,7 @@ function BoothPage() {
   }, [sound]);
 
   const doCapture = useCallback(() => {
-    const canvas = cam.capture(filterCss, cam.mirror);
+    const canvas = cam.capture(filterCss || "none", cam.mirror, arCanvasRef.current);
     if (!canvas) { toast.error("Camera not ready"); return null; }
     // Flash effect
     if (flash) {
@@ -255,6 +261,11 @@ function BoothPage() {
                   filter: filterCss,
                   transform: cam.mirror ? "scaleX(-1)" : "none",
                 }}
+              />
+              <canvas
+                ref={arCanvasRef}
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+                style={{ transform: cam.mirror ? "scaleX(-1)" : "none" }}
               />
               {/* Filter color overlay */}
               {filter.overlay && (
