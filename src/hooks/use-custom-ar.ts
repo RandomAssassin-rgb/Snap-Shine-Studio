@@ -3,12 +3,12 @@ import { FilesetResolver, FaceLandmarker, DrawingUtils } from "@mediapipe/tasks-
 import { loadedAssets, preloadARAssets } from "@/lib/ar-assets";
 
 export const CUSTOM_AR_LENSES = [
-  { id: "puppy_camera", name: "Puppy Camera", iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23ccc'/><circle cx='50' cy='50' r='20' fill='black'/></svg>" },
-  { id: "bw_glasses", name: "BW Glasses", iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='10' y='35' width='80' height='30' fill='black'/></svg>" },
-  { id: "cupids_crown", name: "Cupid's Crown", iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23ffb3c6'/></svg>" },
-  { id: "dog_polka_nerd", name: "Dog Polka Nerd", iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23ffb3c6'/></svg>" },
-  { id: "heart_peace", name: "Heart Peace", iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23ffb3c6'/></svg>" },
-  { id: "melon_bear", name: "Melon Bear", iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%238c5a2b'/></svg>" },
+  { id: "puppy_camera", name: "Puppy Camera", cssFilter: "bright", iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23ccc'/><circle cx='50' cy='50' r='20' fill='black'/></svg>" },
+  { id: "bw_glasses", name: "BW Glasses", cssFilter: "bw", iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='10' y='35' width='80' height='30' fill='black'/></svg>" },
+  { id: "cupids_crown", name: "Cupid's Crown", cssFilter: "blush", iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23ffb3c6'/></svg>" },
+  { id: "dog_polka_nerd", name: "Dog Polka Nerd", cssFilter: "retro_neon", iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23ffb3c6'/></svg>" },
+  { id: "heart_peace", name: "Heart Peace", cssFilter: "mystic_glow", iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23ffb3c6'/></svg>" },
+  { id: "melon_bear", name: "Melon Bear", cssFilter: "warm_beer", iconUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%238c5a2b'/></svg>" },
 ];
 
 export function isCustomARLens(id: string | null) {

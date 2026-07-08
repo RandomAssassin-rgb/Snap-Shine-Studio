@@ -26,7 +26,7 @@ import { FilmStripPreview } from "@/components/film-strip/FilmStripPreview";
 import { FilmStripEditor } from "@/components/film-strip/FilmStripEditor";
 import { SortableShots } from "@/components/film-strip/SortableShots";
 import { VerticalFilterRail, MobileFilterStrip } from "@/components/filter-picker";
-import { useCustomAR } from "@/hooks/use-custom-ar";
+import { useCustomAR, CUSTOM_AR_LENSES } from "@/hooks/use-custom-ar";
 import { EXPORT_SIZES, exportFilmStrip, downloadBlob, type ExportFormat } from "@/lib/film-strip-export";
 import { filmStripLibrary, type StoredTemplate } from "@/lib/film-strip-library";
 
@@ -49,7 +49,9 @@ function FilmBoothPage() {
   const arCanvasRef = useRef<HTMLCanvasElement>(null);
   useCustomAR(cam.videoRef, arCanvasRef, filterId);
 
-  const filter = FILTERS.find((f) => f.id === filterId) ?? FILTERS[0];
+  const customArLens = CUSTOM_AR_LENSES.find(l => l.id === filterId);
+  const resolvedFilterId = customArLens ? customArLens.cssFilter : filterId;
+  const filter = FILTERS.find((f) => f.id === resolvedFilterId) ?? FILTERS[0];
   const filterCss = filter.css === "none" ? undefined : filter.css;
 
   const [presetId, setPresetId] = useState<string>(FILM_STRIP_PRESETS[0].id);

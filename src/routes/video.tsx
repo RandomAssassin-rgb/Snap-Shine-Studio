@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/site-header";
 import { VerticalFilterRail, MobileFilterStrip } from "@/components/filter-picker";
-import { useCustomAR } from "@/hooks/use-custom-ar";
+import { useCustomAR, CUSTOM_AR_LENSES } from "@/hooks/use-custom-ar";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -68,7 +68,9 @@ function VideoBoothPage() {
   const [url, setUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  const filter = getFilter(filterId as any);
+  const customArLens = CUSTOM_AR_LENSES.find(l => l.id === filterId);
+  const resolvedFilterId = customArLens ? customArLens.cssFilter : filterId;
+  const filter = getFilter(resolvedFilterId as any);
   const filterCss = useMemo(() => combineFilterCss(filter, DEFAULT_ADJUST), [filter]);
 
   useEffect(() => { void start(); return () => stopStream(); /* eslint-disable-next-line */ }, [micOn]);

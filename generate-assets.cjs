@@ -1,4 +1,53 @@
-export const AR_ASSETS = {
+const fs = require('fs');
+
+function renderPixelArt(ascii, palette, pixelSize = 4) {
+  const h = ascii.length;
+  const w = ascii[0].length;
+  let rects = "";
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const char = ascii[y][x];
+      if (char !== ' ' && palette[char]) {
+        rects += `<rect x="${x * pixelSize}" y="${y * pixelSize}" width="${pixelSize}" height="${pixelSize}" fill="${palette[char]}"/>`;
+      }
+    }
+  }
+  return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${w * pixelSize} ${h * pixelSize}'>${rects}</svg>`;
+}
+
+const pGlasses = [
+  "   w         w   ",
+  " b               ",
+  "bbbbbbbbbbbbbbbb ",
+  "bbbbbbbbbbbbbbbbb",
+  "bb b bbbb  b bbbb",
+  "bb b bbbb  b bbbb",
+  "b  b  bb   b  bb ",
+  "   b       b     ",
+  "                 ",
+  "           b     "
+];
+
+const pNerd = [
+  "bbbbbbbbbbbbbbbbbbbbbbbbb",
+  "bbbbbbbbbbbbbbbbbbbbbbbbb",
+  "bbbb                bbbbb",
+  "bbbb                bbbbb",
+  "bbbb  w             bbbbb",
+  "bbbb                bbbbb",
+  "bbbb                bbbbb",
+  "bbbb                bbbbb",
+  "bbbbbbbbbbbbbbbbbbbbbbbbb"
+];
+// Actually nerd is just 2 squares connected. Let's make it more accurate to the photo.
+const nerdAscii = [
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "bbb      bbbbbbbbbb      bbb", // wait, ascii art takes too long to get perfect.
+];
+
+// Let's just output raw SVGs directly with <path> for pixel perfection, it's easier to write standard paths.
+const newAssets = `export const AR_ASSETS = {
   pixelGlasses: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-10 -10 170 80' shape-rendering='crispEdges'><path fill='black' d='M0,10 h150 v15 h-10 v10 h-10 v10 h-20 v-10 h-20 v-25 h-30 v25 h-20 v10 h-20 v-10 h-10 v-10 h-10 z'/><rect x='20' y='15' width='5' height='5' fill='white'/><rect x='25' y='20' width='5' height='5' fill='white'/><rect x='30' y='25' width='5' height='5' fill='white'/><rect x='95' y='15' width='5' height='5' fill='white'/><rect x='100' y='20' width='5' height='5' fill='white'/><rect x='105' y='25' width='5' height='5' fill='white'/><path fill='black' d='M-5,-5 h5 v-5 h5 v5 h5 v5 h-5 v5 h-5 v-5 h-5 z'/><path fill='black' d='M140,50 h5 v-5 h5 v5 h5 v5 h-5 v5 h-5 v-5 h-5 z'/></svg>",
   nerdGlasses: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 60' shape-rendering='crispEdges'><path fill='black' fill-rule='evenodd' d='M0,5 h160 v15 h-10 v30 h-60 v-30 h-20 v30 h-60 v-30 h-10 z M15,15 h45 v25 h-45 z M100,15 h45 v25 h-45 z'/></svg>",
   heart: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path fill='%23ffb3c6' stroke='black' stroke-width='6' stroke-linejoin='round' d='M50,85 C50,85 10,55 10,30 C10,15 25,10 35,20 C42,27 50,35 50,35 C50,35 58,27 65,20 C75,10 90,15 90,30 C90,55 50,85 50,85 Z'/></svg>",
@@ -32,7 +81,7 @@ export function preloadARAssets(): Promise<void> {
         if (loaded === keys.length) resolve();
       };
       img.onerror = () => {
-        console.error(`Failed to load AR asset: ${key}`);
+        console.error(\`Failed to load AR asset: \${key}\`);
         loaded++;
         if (loaded === keys.length) resolve();
       };
@@ -40,3 +89,6 @@ export function preloadARAssets(): Promise<void> {
     });
   });
 }
+`;
+
+fs.writeFileSync('src/lib/ar-assets.ts', newAssets);

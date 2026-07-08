@@ -10,7 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { VerticalFilterRail, MobileFilterStrip } from "@/components/filter-picker";
-import { useCustomAR } from "@/hooks/use-custom-ar";
+import { useCustomAR, CUSTOM_AR_LENSES } from "@/hooks/use-custom-ar";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -59,7 +59,9 @@ function BoothPage() {
   const [uploading, setUploading] = useState(false);
   const [publicUrl, setPublicUrl] = useState<string | null>(null);
 
-  const filter = getFilter(filterId as FilterId);
+  const customArLens = CUSTOM_AR_LENSES.find(l => l.id === filterId);
+  const resolvedFilterId = customArLens ? customArLens.cssFilter : filterId;
+  const filter = FILTERS.find((f) => f.id === resolvedFilterId) ?? FILTERS[0];
   const filterCss = useMemo(() => combineFilterCss(filter, adjust), [filter, adjust]);
   const layout = getLayout(layoutId);
   const currentShotIdx = shots.length;
