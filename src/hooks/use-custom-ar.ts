@@ -153,28 +153,42 @@ function drawLens(ctx: CanvasRenderingContext2D, landmarks: any[], w: number, h:
   const midEyeX = (leftEye.x + rightEye.x) / 2;
   const midEyeY = (leftEye.y + rightEye.y) / 2;
 
-  if (lensId === "bw_glasses" || lensId === "dog_polka_nerd") {
-    // Pixel glasses
+  if (lensId === "bw_glasses") {
+    // Thug life Pixel glasses
     const glassesWidth = faceWidth * 1.1;
     drawImage("pixelGlasses", midEyeX, midEyeY, glassesWidth, eyeAngle);
   }
 
+  if (lensId === "dog_polka_nerd") {
+    // Nerd glasses (thick black rims)
+    const glassesWidth = faceWidth * 1.15;
+    drawImage("nerdGlasses", midEyeX, midEyeY, glassesWidth, eyeAngle);
+  }
+
   if (lensId === "puppy_camera" || lensId === "dog_polka_nerd") {
     // Dog ears
-    const earWidth = faceWidth * 0.5;
-    drawImage("dogEarLeft", faceLeft.x, headTop.y - earWidth/2, earWidth, eyeAngle - 0.2);
-    drawImage("dogEarRight", faceRight.x, headTop.y - earWidth/2, earWidth, eyeAngle + 0.2);
+    const earWidth = faceWidth * 0.45;
+    drawImage("dogEarLeft", faceLeft.x + earWidth*0.2, headTop.y - earWidth*0.4, earWidth, eyeAngle - 0.2);
+    drawImage("dogEarRight", faceRight.x - earWidth*0.2, headTop.y - earWidth*0.4, earWidth, eyeAngle + 0.2);
     // Dog nose
-    drawImage("dogNose", nose.x, nose.y, faceWidth * 0.25, eyeAngle);
+    drawImage("dogNose", nose.x, nose.y, faceWidth * 0.28, eyeAngle);
   }
 
   if (lensId === "cupids_crown" || lensId === "heart_peace") {
-    // Floating hearts
-    const crownWidth = faceWidth * 0.8;
-    // Draw 3 hearts in an arch above the head
-    drawImage("heart", headTop.x - crownWidth/2, headTop.y - crownWidth/2, crownWidth * 0.3, -0.3);
-    drawImage("heart", headTop.x, headTop.y - crownWidth*0.7, crownWidth * 0.4, 0);
-    drawImage("heart", headTop.x + crownWidth/2, headTop.y - crownWidth/2, crownWidth * 0.3, 0.3);
+    // Floating hearts (draw 7 hearts in an arc)
+    const crownWidth = faceWidth * 1.2;
+    const r = crownWidth * 0.6; // radius of the arc
+    for (let i = 0; i < 7; i++) {
+      const theta = Math.PI + (Math.PI * (i / 6)); // From PI to 2PI (top half circle)
+      // Widen the arc slightly horizontally
+      const hx = headTop.x + Math.cos(theta + eyeAngle) * (r * 1.1);
+      const hy = headTop.y + Math.sin(theta + eyeAngle) * (r * 0.8) + (r * 0.3); // drop it slightly closer to head
+      // Alternate heart sizes slightly
+      const size = crownWidth * (i % 2 === 0 ? 0.25 : 0.18);
+      // Alternate slight rotation
+      const rot = eyeAngle + (i % 2 === 0 ? 0.2 : -0.2);
+      drawImage("heart", hx, hy, size, rot);
+    }
   }
 
   if (lensId === "heart_peace") {
