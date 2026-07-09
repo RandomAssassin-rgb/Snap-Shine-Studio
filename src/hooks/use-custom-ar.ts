@@ -165,14 +165,11 @@ function drawLens(ctx: CanvasRenderingContext2D, landmarks: any[], w: number, h:
     drawImage("nerdGlasses", midEyeX, midEyeY, glassesWidth, eyeAngle);
   }
 
-  if (lensId === "puppy_camera" || lensId === "dog_polka_nerd") {
-    // Dog ears
-    const earWidth = faceWidth * 0.45;
-    drawImage("dogEarLeft", faceLeft.x + earWidth*0.2, headTop.y - earWidth*0.4, earWidth, eyeAngle - 0.2);
-    drawImage("dogEarRight", faceRight.x - earWidth*0.2, headTop.y - earWidth*0.4, earWidth, eyeAngle + 0.2);
-    // Dog nose
-    drawImage("dogNose", nose.x, nose.y, faceWidth * 0.28, eyeAngle);
-  }
+    if (lensId === "puppy_camera" || lensId === "dog_polka_nerd") {
+      // Dog filter (ears + nose combined in one PNG)
+      const filterWidth = faceWidth * 1.4;
+      drawImage("dogEarLeft", nose.x, nose.y - faceWidth * 0.2, filterWidth, eyeAngle);
+    }
 
   if (lensId === "cupids_crown" || lensId === "heart_peace") {
     // Floating hearts (draw 7 hearts in an arc)
